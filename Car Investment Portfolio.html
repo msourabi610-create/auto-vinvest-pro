@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoInvest Pro - Investissement Automobile VIP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0b0f19',
+                        cardbg: '#131c31',
+                        accent: '#f59e0b',
+                        accenthover: '#d97706'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen pb-24 selection:bg-accent selection:text-black">
+
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ================= AUTH SCREEN (Login / Register) ================= -->
+    <div id="auth-screen" class="fixed inset-0 bg-darkbg z-50 flex items-center justify-center p-4">
+        <div class="bg-cardbg border border-gray-800 w-full max-w-sm rounded-3xl p-6 space-y-6 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 mx-auto bg-gradient-to-tr from-amber-500 to-yellow-300 rounded-2xl flex items-center justify-center text-darkbg font-black text-2xl shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <h1 class="text-xl font-extrabold text-white" id="auth-title">Créer un compte</h1>
+                <p class="text-xs text-gray-400" id="auth-subtitle">Rejoignez AutoInvest Pro et commencez à gagner</p>
+            </div>
+
+            <!-- Toggle Auth Mode -->
+            <div class="grid grid-cols-2 gap-1 bg-gray-900 p-1 rounded-xl border border-gray-800">
+                <button onclick="setAuthMode('register')" id="tab-auth-reg" class="py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all">Inscription</button>
+                <button onclick="setAuthMode('login')" id="tab-auth-log" class="py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">Connexion</button>
+            </div>
+
+            <!-- Auth Form -->
+            <div class="space-y-3">
+                <div id="group-username">
+                    <label class="block text-[11px] text-gray-400 mb-1">Nom d'utilisateur</label>
+                    <input type="text" id="auth-username" placeholder="Ex: Kouadio Marc" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Numéro de téléphone</label>
+                    <input type="text" id="auth-phone" placeholder="Ex: 0700000000" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Mot de passe</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <button onclick="handleAuthSubmit()" id="auth-btn-submit" class="w-full bg-amber-500 hover:bg-amber-600 text-darkbg font-bold py-3 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20">
+                S'inscrire et recevoir le bonus
+            </button>
+
+            <div class="text-center">
+                <a href="https://t.me/+LAPOnC3rQxw2Yzhk" target="_blank" class="text-[11px] text-blue-400 hover:underline flex items-center justify-center gap-1">
+                    <i class="fa-brands fa-telegram"></i> Besoin d'aide ? Contactez le support
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP HEADER -->
+    <header class="sticky top-0 z-40 bg-darkbg/90 backdrop-blur-md border-b border-gray-800 px-4 py-3">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-gradient-to-tr from-amber-500 to-yellow-300 p-2 rounded-xl text-darkbg font-extrabold shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid fa-car-side text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg bg-gradient-to-r from-white via-gray-200 to-amber-400 bg-clip-text text-transparent">AutoInvest Pro</h1>
+                    <p class="text-[10px] text-emerald-400 font-medium flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 100% Légal & Sécurisé</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="https://t.me/+LAPOnC3rQxw2Yzhk" target="_blank" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all">
+                    <i class="fa-brands fa-telegram text-sm"></i> Telegram
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 py-4">
+
+        <!-- ================= ACCUEIL TAB ================= -->
+        <div id="tab-accueil" class="tab-content active space-y-4">
+            <!-- User Balance & Profile Card -->
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 border border-gray-800 p-5 shadow-2xl">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-darkbg font-bold text-xl shadow-md" id="user-avatar-initial">
+                            U
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm" id="display-username">Investisseur</span>
+                                <span class="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30" id="user-vip-badge">VIP 0</span>
+                            </div>
+                            <p class="text-xs text-gray-400 font-mono">ID: <span id="display-userid">884210</span> <button onclick="copyUserId()" class="text-amber-400 hover:underline ml-1"><i class="fa-regular fa-copy"></i></button></p>
+                        </div>
+                    </div>
+                    <button onclick="openDepositModal()" class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg shadow-emerald-500/20 flex items-center gap-1">
+                        <i class="fa-solid fa-wallet"></i> Dépôt
+                    </button>
+                </div>
+
+                <!-- Wallet Stats Grid -->
+                <div class="grid grid-cols-3 gap-2 pt-2 border-t border-gray-800/80 text-center">
+                    <div class="bg-cardbg/60 p-2 rounded-xl border border-gray-800">
+                        <p class="text-[10px] text-gray-400 mb-1">Solde Dépôt</p>
+                        <p class="font-bold text-xs text-emerald-400" id="balance-recharge">0 FCFA</p>
+                    </div>
+                    <div class="bg-cardbg/60 p-2 rounded-xl border border-gray-800">
+                        <p class="text-[10px] text-gray-400 mb-1">Solde Retrait</p>
+                        <p class="font-bold text-xs text-amber-400" id="balance-withdraw">0 FCFA</p>
+                    </div>
+                    <div class="bg-cardbg/60 p-2 rounded-xl border border-gray-800">
+                        <p class="text-[10px] text-gray-400 mb-1">Revenus Total</p>
+                        <p class="font-bold text-xs text-blue-400" id="balance-earnings">0 FCFA</p>
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                    <button onclick="openDepositModal()" class="bg-amber-500 hover:bg-amber-600 text-darkbg font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all">
+                        <i class="fa-solid fa-plus-circle text-sm"></i> Recharger (Min 2500F)
+                    </button>
+                    <button onclick="openWithdrawModal()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 border border-gray-700 transition-all">
+                        <i class="fa-solid fa-money-bill-transfer text-sm"></i> Retirer (Min 1100F)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Navigation Shortcuts Grid -->
+            <div class="grid grid-cols-4 gap-2 text-center">
+                <div onclick="switchTab('investir')" class="bg-cardbg p-3 rounded-xl border border-gray-800 hover:border-amber-500/50 cursor-pointer transition-all">
+                    <div class="w-10 h-10 mx-auto mb-1 bg-amber-500/10 text-amber-400 rounded-lg flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-car"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-300">Investir</span>
+                </div>
+                <div onclick="openTeamModal()" class="bg-cardbg p-3 rounded-xl border border-gray-800 hover:border-blue-500/50 cursor-pointer transition-all">
+                    <div class="w-10 h-10 mx-auto mb-1 bg-blue-500/10 text-blue-400 rounded-lg flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-300">Équipe (10%)</span>
+                </div>
+                <div onclick="switchTab('taches')" class="bg-cardbg p-3 rounded-xl border border-gray-800 hover:border-purple-500/50 cursor-pointer transition-all">
+                    <div class="w-10 h-10 mx-auto mb-1 bg-purple-500/10 text-purple-400 rounded-lg flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-tasks"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-300">Tâches</span>
+                </div>
+                <a href="https://t.me/+LAPOnC3rQxw2Yzhk" target="_blank" class="bg-cardbg p-3 rounded-xl border border-gray-800 hover:border-sky-500/50 cursor-pointer transition-all block">
+                    <div class="w-10 h-10 mx-auto mb-1 bg-sky-500/10 text-sky-400 rounded-lg flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <span class="text-[11px] font-medium text-gray-300">Service</span>
+                </a>
+            </div>
+
+            <!-- Notice & Telegram Banner -->
+            <div class="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/30 rounded-xl p-4 flex items-center gap-3">
+                <div class="text-blue-400 text-2xl">
+                    <i class="fa-brands fa-telegram animate-bounce"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-xs font-bold text-white">Canal Officiel Telegram</h3>
+                    <p class="text-[11px] text-gray-300">Rejoignez notre canal pour suivre vos paiements et actualités.</p>
+                </div>
+                <a href="https://t.me/+LAPOnC3rQxw2Yzhk" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">Rejoindre</a>
+            </div>
+
+            <!-- Active Investments Widget -->
+            <div class="bg-cardbg rounded-2xl border border-gray-800 p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-chart-line text-amber-400"></i> Mes Investissements en Cours</h3>
+                    <span class="text-xs bg-gray-800 px-2 py-0.5 rounded text-gray-400 font-mono" id="active-count">0 actif(s)</span>
+                </div>
+                <div id="active-investments-container" class="space-y-3">
+                    <div class="text-center py-6 text-gray-500 text-xs">
+                        Aucun investissement actif pour le moment. Choisissez un pack de voiture pour commencer !
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= INVESTIR TAB ================= -->
+        <div id="tab-investir" class="tab-content space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="font-extrabold text-base text-white flex items-center gap-2"><i class="fa-solid fa-car text-amber-400"></i> Catalogue de Vente & Investissement</h2>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 bg-cardbg p-1 rounded-xl border border-gray-800">
+                <button onclick="switchInvestTab('court')" id="btn-tab-court" class="py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all">Court Terme</button>
+                <button onclick="switchInvestTab('long')" id="btn-tab-long" class="py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">Long Terme</button>
+            </div>
+
+            <div id="plans-court" class="space-y-3"></div>
+            <div id="plans-long" class="space-y-3 hidden"></div>
+        </div>
+
+        <!-- ================= TACHES TAB ================= -->
+        <div id="tab-taches" class="tab-content space-y-4">
+            <div class="bg-gradient-to-br from-purple-900/40 via-cardbg to-cardbg border border-purple-500/30 rounded-2xl p-5 text-center">
+                <span class="bg-purple-500/20 text-purple-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-purple-500/30">Programme de Parrainage 10%</span>
+                <h2 class="text-2xl font-black text-white mt-2" id="referral-earnings">0 FCFA</h2>
+                <p class="text-xs text-gray-400 mt-1">Commissions gagnées grâce à vos filleuls</p>
+
+                <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-gray-800">
+                    <div>
+                        <p class="text-[10px] text-gray-400">Invités</p>
+                        <p class="text-sm font-bold text-white" id="ref-count-invited">0</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400">Actifs</p>
+                        <p class="text-sm font-bold text-emerald-400" id="ref-count-active">0</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400">Commission</p>
+                        <p class="text-sm font-bold text-amber-400">10%</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 bg-gray-900/80 p-3 rounded-xl border border-gray-800 flex items-center justify-between gap-2">
+                    <span class="text-xs text-gray-300 truncate font-mono" id="referral-link">https://autoinvest.pro/ref/auto884</span>
+                    <button onclick="copyReferralLink()" class="bg-amber-500 hover:bg-amber-600 text-darkbg font-bold px-3 py-1.5 rounded-lg text-xs shrink-0">Copier</button>
+                </div>
+            </div>
+
+            <div class="bg-cardbg p-4 rounded-2xl border border-gray-800 space-y-2">
+                <h3 class="font-bold text-xs text-white flex items-center gap-2"><i class="fa-solid fa-circle-info text-amber-400"></i> Fonctionnement du Parrainage</h3>
+                <p class="text-[11px] text-gray-400 leading-relaxed">
+                    Partagez votre lien de parrainage avec vos amis. Dès qu'ils effectuent un dépôt et investissent, vous touchez instantanément <strong class="text-amber-400">10% de commission</strong> !
+                </p>
+            </div>
+        </div>
+
+        <!-- ================= COMPTE TAB ================= -->
+        <div id="tab-compte" class="tab-content space-y-4">
+            <div class="bg-cardbg rounded-2xl border border-gray-800 p-4 space-y-4">
+                <div class="flex items-center gap-3 pb-3 border-b border-gray-800">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-darkbg font-extrabold text-2xl shadow-lg" id="profile-avatar-large">
+                        U
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-sm text-white" id="profile-username">Investisseur VIP</h2>
+                        <p class="text-xs text-gray-400 font-mono">ID: <span id="profile-userid">884210</span></p>
+                        <span class="inline-block mt-1 bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30" id="profile-vip-level">Niveau VIP 0</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <button onclick="openDepositModal()" class="w-full bg-gray-900/60 hover:bg-gray-800 p-3 rounded-xl border border-gray-800 flex items-center justify-between text-xs font-medium text-gray-200 transition-all">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-wallet text-emerald-400"></i> Historique de Dépôt</span>
+                        <i class="fa-solid fa-chevron-right text-gray-500"></i>
+                    </button>
+                    <button onclick="openWithdrawModal()" class="w-full bg-gray-900/60 hover:bg-gray-800 p-3 rounded-xl border border-gray-800 flex items-center justify-between text-xs font-medium text-gray-200 transition-all">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-amber-400"></i> Historique des Retraits</span>
+                        <i class="fa-solid fa-chevron-right text-gray-500"></i>
+                    </button>
+                    <a href="https://t.me/+LAPOnC3rQxw2Yzhk" target="_blank" class="w-full bg-gray-900/60 hover:bg-gray-800 p-3 rounded-xl border border-gray-800 flex items-center justify-between text-xs font-medium text-gray-200 transition-all block">
+                        <span class="flex items-center gap-2"><i class="fa-brands fa-telegram text-blue-400"></i> Canal Telegram Officiel</span>
+                        <i class="fa-solid fa-chevron-right text-gray-500"></i>
+                    </a>
+                </div>
+
+                <div class="pt-2 space-y-2">
+                    <button onclick="logoutAccount()" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 py-2.5 rounded-xl text-xs font-bold transition-all">
+                        Se déconnecter
+                    </button>
+                    <button onclick="resetAccountData()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 py-2.5 rounded-xl text-xs font-bold transition-all">
+                        Réinitialiser toutes les données
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-darkbg/95 backdrop-blur-md border-t border-gray-800 z-40 py-2">
+        <div class="max-w-md mx-auto grid grid-cols-4 text-center">
+            <button onclick="switchTab('accueil')" id="nav-accueil" class="flex flex-col items-center justify-center text-amber-400 transition-all">
+                <i class="fa-solid fa-house text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">Accueil</span>
+            </button>
+            <button onclick="switchTab('investir')" id="nav-investir" class="flex flex-col items-center justify-center text-gray-400 hover:text-amber-400 transition-all">
+                <i class="fa-solid fa-car text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">Investir</span>
+            </button>
+            <button onclick="switchTab('taches')" id="nav-taches" class="flex flex-col items-center justify-center text-gray-400 hover:text-amber-400 transition-all">
+                <i class="fa-solid fa-users text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">Parrainage</span>
+            </button>
+            <button onclick="switchTab('compte')" id="nav-compte" class="flex flex-col items-center justify-center text-gray-400 hover:text-amber-400 transition-all">
+                <i class="fa-solid fa-user text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">Compte</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Deposit Modal -->
+    <div id="modal-deposit" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border border-gray-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-wallet text-emerald-400"></i> Recharger votre compte</h3>
+                <button onclick="closeDepositModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-blue-900/20 border border-blue-500/30 p-3 rounded-xl text-[11px] text-blue-200">
+                <p class="font-bold mb-1"><i class="fa-solid fa-circle-info"></i> Instructions de dépôt :</p>
+                Effectuez votre dépôt Wave ou MTN Mobile Money sur le numéro officiel ci-dessous. Minimum : <strong class="text-amber-400">2.500 FCFA</strong>.
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div class="bg-gray-900 p-3 rounded-xl border border-gray-800 text-center">
+                    <div class="h-8 flex items-center justify-center mb-1">
+                        <span class="bg-blue-500 text-white font-black px-2 py-0.5 rounded text-xs tracking-wider">WAVE</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400">Numéro :</p>
+                    <p class="font-mono font-bold text-xs text-amber-400 select-all">+225 0596180495</p>
+                </div>
+                <div class="bg-gray-900 p-3 rounded-xl border border-gray-800 text-center">
+                    <div class="h-8 flex items-center justify-center mb-1">
+                        <span class="bg-yellow-500 text-darkbg font-black px-2 py-0.5 rounded text-xs tracking-wider">MTN</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400">Numéro :</p>
+                    <p class="font-mono font-bold text-xs text-amber-400 select-all">+225 0596180495</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Montant à déposer (FCFA)</label>
+                    <input type="number" id="deposit-amount" min="2500" value="2500" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Référence / Numéro de transaction</label>
+                    <input type="text" id="deposit-ref" placeholder="Ex: TX-9843217" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <button onclick="submitDeposit()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-emerald-500/20">
+                Confirmer le dépôt
+            </button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="modal-withdraw" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border border-gray-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-money-bill-transfer text-amber-400"></i> Retirer vos gains</h3>
+                <button onclick="closeWithdrawModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-gray-900 p-3 rounded-xl border border-gray-800 text-xs flex justify-between items-center">
+                <span class="text-gray-400">Solde Retirable :</span>
+                <span class="font-bold text-amber-400" id="withdraw-available-balance">0 FCFA</span>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Montant du retrait (Min: 1.100 FCFA)</label>
+                    <input type="number" id="withdraw-amount" min="1100" placeholder="1100" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Votre numéro Mobile Money / Wave</label>
+                    <input type="text" id="withdraw-phone" placeholder="Ex: 0700000000" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <button onclick="submitWithdraw()" class="w-full bg-amber-500 hover:bg-amber-600 text-darkbg font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20">
+                Effectuer le retrait
+            </button>
+        </div>
+    </div>
+
+    <!-- Team Modal -->
+    <div id="modal-team" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border border-gray-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-users text-blue-400"></i> Gestion d'Équipe (Parrainage)</h3>
+                <button onclick="closeTeamModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-gray-300">
+                Gagnez <strong class="text-amber-400">10% de commission</strong> sur tous les investissements de vos filleuls !
+            </p>
+            <div class="bg-gray-900 p-3 rounded-xl border border-gray-800 space-y-2">
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-400">Total Filleuls:</span>
+                    <span class="font-bold text-white" id="team-modal-count">0</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-400">Commissions Gagnées:</span>
+                    <span class="font-bold text-amber-400" id="team-modal-earnings">0 FCFA</span>
+                </div>
+            </div>
+            <button onclick="closeTeamModal()" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-xl text-xs transition-all">
+                Fermer
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- CATALOGUE DE PLANS ---
+        const plansCourt = [
+            { id: 'c1', name: 'VIP 1 - Berline Urbaine', price: 2500, daily: 500, days: 20, total: 10000, img: 'https://images.unsplash.com/photo-1555353540-64580b51c258?auto=format&fit=crop&w=600&q=80', vipLevel: 'VIP 1' },
+            { id: 'c2', name: 'VIP 2 - SUV Sportif', price: 3500, daily: 1000, days: 20, total: 20000, img: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80', vipLevel: 'VIP 2' },
+            { id: 'c3', name: 'VIP 3 - GT de Luxe', price: 4500, daily: 2100, days: 30, total: 63000, img: 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=600&q=80', vipLevel: 'VIP 3' },
+            { id: 'c4', name: 'SIPV 1 - Supercar Compétition', price: 30000, daily: 5000, days: 20, total: 100000, img: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80', vipLevel: 'SIPV 1' },
+            { id: 'c5', name: 'SIPV 2 - Hypercar Édition Limitée', price: 50000, daily: 15000, days: 5, total: 75000, img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80', vipLevel: 'SIPV 2' }
+        ];
+
+        const plansLong = [
+            { id: 'l1', name: 'Long-Terme Vip 1 - Berline Classique', price: 2500, daily: 500, days: 30, total: 15000, img: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80', vipLevel: 'Long VIP 1' },
+            { id: 'l2', name: 'Long-Terme Vip 2 - SUV Premium', price: 5000, daily: 1200, days: 30, total: 36000, img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80', vipLevel: 'Long VIP 2' },
+            { id: 'l3', name: 'Long-Terme Vip 3 - Berline Exécutive', price: 15000, daily: 3800, days: 30, total: 114000, img: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=600&q=80', vipLevel: 'Long VIP 3' },
+            { id: 'l4', name: 'Long-Terme SIPV - Flotte Commerciale', price: 100000, daily: 12000, days: 45, total: 540000, img: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80', vipLevel: 'Long SIPV' }
+        ];
+
+        // --- GESTION AUTHENTIFICATION & UTILISATEUR ---
+        let authMode = 'register'; // 'register' ou 'login'
+        let currentUser = null;
+
+        function setAuthMode(mode) {
+            authMode = mode;
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const btnSubmit = document.getElementById('auth-btn-submit');
+            const groupUsername = document.getElementById('group-username');
+            const tabReg = document.getElementById('tab-auth-reg');
+            const tabLog = document.getElementById('tab-auth-log');
+
+            if (mode === 'register') {
+                title.innerText = "Créer un compte";
+                subtitle.innerText = "Rejoignez AutoInvest Pro et commencez à gagner";
+                btnSubmit.innerText = "S'inscrire et recevoir le bonus";
+                groupUsername.style.display = 'block';
+                tabReg.className = "py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all";
+                tabLog.className = "py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
+            } else {
+                title.innerText = "Connexion";
+                subtitle.innerText = "Connectez-vous à votre compte existant";
+                btnSubmit.innerText = "Se connecter";
+                groupUsername.style.display = 'none';
+                tabReg.className = "py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
+                tabLog.className = "py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all";
+            }
+        }
+
+        function handleAuthSubmit() {
+            const phone = document.getElementById('auth-phone').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const username = document.getElementById('auth-username').value.trim();
+
+            if (!phone || !password) {
+                showToast("Veuillez remplir tous les champs obligatoires.", "error");
+                return;
+            }
+
+            let usersDb = JSON.parse(localStorage.getItem('autoinvest_users_db') || '{}');
+
+            if (authMode === 'register') {
+                if (!username) {
+                    showToast("Veuillez entrer un nom d'utilisateur.", "error");
+                    return;
+                }
+                if (usersDb[phone]) {
+                    showToast("Ce numéro est déjà enregistré. Veuillez vous connecter.", "error");
+                    setAuthMode('login');
+                    return;
+                }
+
+                // Créer nouvel utilisateur
+                const newUser = {
+                    id: Math.floor(100000 + Math.random() * 900000).toString(),
+                    username: username,
+                    phone: phone,
+                    password: password,
+                    balanceRecharge: 500, // Bonus d'inscription de test
+                    balanceWithdraw: 0,
+                    balanceEarnings: 0,
+                    activeInvestments: [],
+                    vipLevel: 'VIP 0',
+                    referralEarnings: 0,
+                    invitedCount: 0,
+                    activeReferrals: 0
+                };
+
+                usersDb[phone] = newUser;
+                localStorage.setItem('autoinvest_users_db', JSON.stringify(usersDb));
+                currentUser = newUser;
+                localStorage.setItem('autoinvest_current_session', phone);
+
+                showToast("Compte créé avec succès ! Bienvenue.", "success");
+                closeAuthScreen();
+            } else {
+                // Mode Connexion
+                if (!usersDb[phone] || usersDb[phone].password !== password) {
+                    showToast("Numéro ou mot de passe incorrect.", "error");
+                    return;
+                }
+
+                currentUser = usersDb[phone];
+                localStorage.setItem('autoinvest_current_session', phone);
+                showToast("Connexion réussie !", "success");
+                closeAuthScreen();
+            }
+
+            updateUI();
+        }
+
+        function checkSession() {
+            const sessionPhone = localStorage.getItem('autoinvest_current_session');
+            if (sessionPhone) {
+                const usersDb = JSON.parse(localStorage.getItem('autoinvest_users_db') || '{}');
+                if (usersDb[sessionPhone]) {
+                    currentUser = usersDb[sessionPhone];
+                    closeAuthScreen();
+                    updateUI();
+                    return;
+                }
+            }
+            // Afficher l'écran d'authentification
+            document.getElementById('auth-screen').classList.remove('hidden');
+        }
+
+        function closeAuthScreen() {
+            document.getElementById('auth-screen').classList.add('hidden');
+        }
+
+        function logoutAccount() {
+            localStorage.removeItem('autoinvest_current_session');
+            currentUser = null;
+            location.reload();
+        }
+
+        function saveUserData() {
+            if (!currentUser) return;
+            const usersDb = JSON.parse(localStorage.getItem('autoinvest_users_db') || '{}');
+            usersDb[currentUser.phone] = currentUser;
+            localStorage.setItem('autoinvest_users_db', JSON.stringify(usersDb));
+            updateUI();
+        }
+
+        function resetAccountData() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        // --- MISE À JOUR INTERFACE ---
+        function updateUI() {
+            if (!currentUser) return;
+
+            document.getElementById('balance-recharge').innerText = currentUser.balanceRecharge.toLocaleString() + ' FCFA';
+            document.getElementById('balance-withdraw').innerText = currentUser.balanceWithdraw.toLocaleString() + ' FCFA';
+            document.getElementById('balance-earnings').innerText = currentUser.balanceEarnings.toLocaleString() + ' FCFA';
+            document.getElementById('withdraw-available-balance').innerText = currentUser.balanceWithdraw.toLocaleString() + ' FCFA';
+            
+            document.getElementById('display-userid').innerText = currentUser.id;
+            document.getElementById('profile-userid').innerText = currentUser.id;
+            document.getElementById('display-username').innerText = currentUser.username;
+            document.getElementById('profile-username').innerText = currentUser.username;
+            document.getElementById('user-vip-badge').innerText = currentUser.vipLevel;
+            document.getElementById('profile-vip-level').innerText = 'Niveau ' + currentUser.vipLevel;
+            
+            document.getElementById('referral-earnings').innerText = currentUser.referralEarnings.toLocaleString() + ' FCFA';
+            document.getElementById('team-modal-earnings').innerText = currentUser.referralEarnings.toLocaleString() + ' FCFA';
+            document.getElementById('ref-count-invited').innerText = currentUser.invitedCount;
+            document.getElementById('ref-count-active').innerText = currentUser.activeReferrals;
+            document.getElementById('team-modal-count').innerText = currentUser.invitedCount;
+
+            renderActiveInvestments();
+        }
+
+        // --- RENDU CATALOGUE ---
+        function renderPlans() {
+            const courtContainer = document.getElementById('plans-court');
+            courtContainer.innerHTML = plansCourt.map(p => `
+                <div class="bg-cardbg rounded-2xl border border-gray-800 overflow-hidden shadow-lg hover:border-amber-500/50 transition-all">
+                    <div class="relative h-36">
+                        <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover">
+                        <div class="absolute top-2 left-2 bg-amber-500 text-darkbg font-extrabold text-[10px] px-2.5 py-1 rounded-full">
+                            ${p.vipLevel}
+                        </div>
+                        <div class="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white font-mono text-[10px] px-2 py-1 rounded">
+                            ${p.days} Jours
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <h3 class="font-bold text-sm text-white">${p.name}</h3>
+                        <div class="grid grid-cols-2 gap-2 bg-gray-900/60 p-2.5 rounded-xl border border-gray-800 text-center">
+                            <div>
+                                <p class="text-[10px] text-gray-400">Quotidien</p>
+                                <p class="text-xs font-bold text-emerald-400">+${p.daily.toLocaleString()} F</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-400">Gain Total</p>
+                                <p class="text-xs font-bold text-amber-400">${p.total.toLocaleString()} F</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="text-xs text-gray-400 font-semibold">Prix: <strong class="text-white">${p.price.toLocaleString()} FCFA</strong></span>
+                            <button onclick="investInPlan('${p.id}', 'court')" class="bg-amber-500 hover:bg-amber-600 text-darkbg font-bold px-4 py-2 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all">
+                                Investir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const longContainer = document.getElementById('plans-long');
+            longContainer.innerHTML = plansLong.map(p => `
+                <div class="bg-cardbg rounded-2xl border border-gray-800 overflow-hidden shadow-lg hover:border-amber-500/50 transition-all">
+                    <div class="relative h-36">
+                        <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover">
+                        <div class="absolute top-2 left-2 bg-blue-600 text-white font-extrabold text-[10px] px-2.5 py-1 rounded-full">
+                            ${p.vipLevel}
+                        </div>
+                        <div class="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white font-mono text-[10px] px-2 py-1 rounded">
+                            ${p.days} Jours
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <h3 class="font-bold text-sm text-white">${p.name}</h3>
+                        <div class="grid grid-cols-2 gap-2 bg-gray-900/60 p-2.5 rounded-xl border border-gray-800 text-center">
+                            <div>
+                                <p class="text-[10px] text-gray-400">Quotidien</p>
+                                <p class="text-xs font-bold text-emerald-400">+${p.daily.toLocaleString()} F</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-400">Gain Total</p>
+                                <p class="text-xs font-bold text-amber-400">${p.total.toLocaleString()} F</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="text-xs text-gray-400 font-semibold">Prix: <strong class="text-white">${p.price.toLocaleString()} FCFA</strong></span>
+                            <button onclick="investInPlan('${p.id}', 'long')" class="bg-amber-500 hover:bg-amber-600 text-darkbg font-bold px-4 py-2 rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all">
+                                Investir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- NAVIGATION TABS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            ['accueil', 'investir', 'taches', 'compte'].forEach(t => {
+                const btn = document.getElementById('nav-' + t);
+                btn.className = 'flex flex-col items-center justify-center text-gray-400 hover:text-amber-400 transition-all';
+            });
+            document.getElementById('nav-' + tabId).className = 'flex flex-col items-center justify-center text-amber-400 transition-all';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchInvestTab(type) {
+            if (type === 'court') {
+                document.getElementById('plans-court').classList.remove('hidden');
+                document.getElementById('plans-long').classList.add('hidden');
+                document.getElementById('btn-tab-court').className = 'py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all';
+                document.getElementById('btn-tab-long').className = 'py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all';
+            } else {
+                document.getElementById('plans-court').classList.add('hidden');
+                document.getElementById('plans-long').classList.remove('hidden');
+                document.getElementById('btn-tab-court').className = 'py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all';
+                document.getElementById('btn-tab-long').className = 'py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all';
+            }
+        }
+
+        // --- LOGIQUE INVESTISSEMENT ---
+        function investInPlan(planId, category) {
+            if (!currentUser) return;
+            const planList = category === 'court' ? plansCourt : plansLong;
+            const plan = planList.find(p => p.id === planId);
+            if (!plan) return;
+
+            if (currentUser.balanceRecharge < plan.price) {
+                showToast(`Solde insuffisant ! Veuillez recharger au moins ${plan.price.toLocaleString()} FCFA.`, 'error');
+                openDepositModal();
+                return;
+            }
+
+            currentUser.balanceRecharge -= plan.price;
+            currentUser.vipLevel = plan.vipLevel;
+
+            currentUser.activeInvestments.push({
+                id: Date.now(),
+                name: plan.name,
+                daily: plan.daily,
+                total: plan.total,
+                daysLeft: plan.days
+            });
+
+            saveUserData();
+            showToast(`Investissement réussi dans "${plan.name}" !`, 'success');
+            switchTab('accueil');
+        }
+
+        function renderActiveInvestments() {
+            if (!currentUser) return;
+            const container = document.getElementById('active-investments-container');
+            document.getElementById('active-count').innerText = currentUser.activeInvestments.length + ' actif(s)';
+
+            if (currentUser.activeInvestments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-gray-500 text-xs">
+                        Aucun investissement actif pour le moment. Choisissez un pack de voiture pour commencer !
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = currentUser.activeInvestments.map(inv => `
+                <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-xs text-white">${inv.name}</span>
+                        <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-mono">${inv.daysLeft} jours restants</span>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-gray-400">
+                        <span>Revenu Quotidien: <strong class="text-emerald-400">+${inv.daily.toLocaleString()} F</strong></span>
+                        <span>Total Prévu: <strong class="text-amber-400">${inv.total.toLocaleString()} F</strong></span>
+                    </div>
+                    <button onclick="collectDailyProfit(${inv.id})" class="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 py-1.5 rounded-lg text-xs font-bold transition-all">
+                        Récolter le gain journalier (+${inv.daily.toLocaleString()} F)
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function collectDailyProfit(invId) {
+            if (!currentUser) return;
+            const inv = currentUser.activeInvestments.find(i => i.id === invId);
+            if (!inv) return;
+
+            if (inv.daysLeft <= 0) {
+                showToast('Cet investissement est déjà arrivé à terme !', 'error');
+                return;
+            }
+
+            inv.daysLeft--;
+            currentUser.balanceWithdraw += inv.daily;
+            currentUser.balanceEarnings += inv.daily;
+
+            if (inv.daysLeft === 0) {
+                showToast(`Félicitations ! L'investissement "${inv.name}" est terminé.`, 'success');
+            } else {
+                showToast(`Gain journalier de ${inv.daily.toLocaleString()} FCFA ajouté au solde retirable !`, 'success');
+            }
+
+            saveUserData();
+        }
+
+        // --- MODALS & DEPOT / RETRAIT ---
+        function openDepositModal() { document.getElementById('modal-deposit').classList.remove('hidden'); }
+        function closeDepositModal() { document.getElementById('modal-deposit').classList.add('hidden'); }
+        function openWithdrawModal() { document.getElementById('modal-withdraw').classList.remove('hidden'); }
+        function closeWithdrawModal() { document.getElementById('modal-withdraw').classList.add('hidden'); }
+        function openTeamModal() { document.getElementById('modal-team').classList.remove('hidden'); }
+        function closeTeamModal() { document.getElementById('modal-team').classList.add('hidden'); }
+
+        function submitDeposit() {
+            if (!currentUser) return;
+            const amount = parseInt(document.getElementById('deposit-amount').value);
+            const ref = document.getElementById('deposit-ref').value.trim();
+
+            if (isNaN(amount) || amount < 2500) {
+                showToast('Le montant minimum de dépôt est de 2.500 FCFA.', 'error');
+                return;
+            }
+            if (!ref) {
+                showToast('Veuillez entrer la référence de transaction.', 'error');
+                return;
+            }
+
+            currentUser.balanceRecharge += amount;
+            currentUser.referralEarnings += amount * 0.10;
+            currentUser.balanceWithdraw += amount * 0.10;
+            currentUser.invitedCount++;
+            currentUser.activeReferrals++;
+
+            saveUserData();
+            closeDepositModal();
+            showToast(`Dépôt de ${amount.toLocaleString()} FCFA validé avec succès !`, 'success');
+            document.getElementById('deposit-ref').value = '';
+        }
+
+        function submitWithdraw() {
+            if (!currentUser) return;
+            const amount = parseInt(document.getElementById('withdraw-amount').value);
+            const phone = document.getElementById('withdraw-phone').value.trim();
+
+            if (isNaN(amount) || amount < 1100) {
+                showToast('Le retrait minimum est de 1.100 FCFA.', 'error');
+                return;
+            }
+            if (amount > currentUser.balanceWithdraw) {
+                showToast('Solde retirable insuffisant.', 'error');
+                return;
+            }
+            if (!phone) {
+                showToast('Veuillez entrer votre numéro de téléphone.', 'error');
+                return;
+            }
+
+            currentUser.balanceWithdraw -= amount;
+            saveUserData();
+            closeWithdrawModal();
+            showToast(`Demande de retrait de ${amount.toLocaleString()} FCFA envoyée avec succès !`, 'success');
+            document.getElementById('withdraw-amount').value = '';
+            document.getElementById('withdraw-phone').value = '';
+        }
+
+        function copyUserId() {
+            if (!currentUser) return;
+            navigator.clipboard.writeText(currentUser.id);
+            showToast('ID copié dans le presse-papier !', 'success');
+        }
+
+        function copyReferralLink() {
+            if (!currentUser) return;
+            const link = `https://autoinvest.pro/ref/auto${currentUser.id}`;
+            navigator.clipboard.writeText(link);
+            showToast('Lien de parrainage copié (10% de bonus) !', 'success');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white';
+            const icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+            toast.className = `${bgClass} px-4 py-3 rounded-xl shadow-xl text-xs font-medium flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        window.onload = function() {
+            checkSession();
+            renderPlans();
+        }
+    </script>
+</body>
+</html>
