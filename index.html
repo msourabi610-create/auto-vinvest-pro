@@ -355,4 +355,72 @@
 
             let targetUser = db.users.find(u => u.id === dep.userUuid);
             if (targetUser) {
-                targetUser.balan
+                targetUser.balanceDeposit += dep.amount;
+            }
+
+            saveDB();
+            renderAdminDeposits();
+            alert("Dépôt validé et crédité avec succès sur le compte client !");
+        }
+
+        function rejectDeposit(depId) {
+            const dep = db.deposits.find(d => d.id === depId);
+            if (!dep) return;
+            dep.status = 'rejected';
+            saveDB();
+            renderAdminDeposits();
+            alert("Dépôt rejeté.");
+        }
+
+        function updateUI() {
+            if (!db.currentUser) return;
+            document.getElementById('user-display-name').innerText = db.currentUser.name;
+            document.getElementById('user-id-display').innerText = db.currentUser.id;
+            document.getElementById('user-avatar-initial').innerText = db.currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('balance-deposit').innerText = db.currentUser.balanceDeposit + " FCFA";
+            document.getElementById('balance-withdraw').innerText = db.currentUser.balanceWithdraw + " FCFA";
+            document.getElementById('balance-total').innerText = db.currentUser.revenueTotal + " FCFA";
+
+            // Rendu complet du catalogue d'investissement
+            const catalog = document.getElementById('investment-catalog');
+            catalog.innerHTML = `
+                <div class="bg-dark-800 border border-dark-700 rounded-2xl overflow-hidden p-3 flex space-x-3 items-center">
+                    <div class="w-20 h-20 bg-dark-900 rounded-xl flex items-center justify-center text-gold-500 text-xl border border-dark-700">
+                        <i class="fa-solid fa-car"></i>
+                    </div>
+                    <div class="flex-1 space-y-1">
+                        <span class="text-[10px] bg-gold-500/10 text-gold-500 px-2 py-0.5 rounded font-bold">VIP 1 - Berline Urbaine</span>
+                        <h4 class="text-xs font-bold text-white">Quotidien +500 F</h4>
+                        <p class="text-[10px] text-gray-400">Prix : 2500 FCFA</p>
+                    </div>
+                </div>
+                <div class="bg-dark-800 border border-dark-700 rounded-2xl overflow-hidden p-3 flex space-x-3 items-center">
+                    <div class="w-20 h-20 bg-dark-900 rounded-xl flex items-center justify-center text-gold-500 text-xl border border-dark-700">
+                        <i class="fa-solid fa-truck-monster"></i>
+                    </div>
+                    <div class="flex-1 space-y-1">
+                        <span class="text-[10px] bg-gold-500/10 text-gold-500 px-2 py-0.5 rounded font-bold">VIP 2 - SUV Tout-Terrain</span>
+                        <h4 class="text-xs font-bold text-white">Quotidien +1200 F</h4>
+                        <p class="text-[10px] text-gray-400">Prix : 6000 FCFA</p>
+                    </div>
+                </div>
+                <div class="bg-dark-800 border border-dark-700 rounded-2xl overflow-hidden p-3 flex space-x-3 items-center">
+                    <div class="w-20 h-20 bg-dark-900 rounded-xl flex items-center justify-center text-gold-500 text-xl border border-dark-700">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="flex-1 space-y-1">
+                        <span class="text-[10px] bg-gold-500/10 text-gold-500 px-2 py-0.5 rounded font-bold">VIP 3 - Bolide Sportif</span>
+                        <h4 class="text-xs font-bold text-white">Quotidien +3000 F</h4>
+                        <p class="text-[10px] text-gray-400">Prix : 15000 FCFA</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.onload = function() {
+            checkSession();
+        };
+    </script>
+</body>
+</html>
+
