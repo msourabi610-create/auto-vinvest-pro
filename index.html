@@ -6,546 +6,401 @@
     <title>AutoInvest Pro - Investissement Réel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { darkbg: '#0b0f19', cardbg: '#131c31', accent: '#f59e0b', accenthover: '#d97706' },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    colors: {
+                        dark: { 900: '#0b0f19', 800: '#131b2e', 700: '#1e293b', 600: '#334155' },
+                        gold: { 500: '#f59e0b', 600: '#d97706' }
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0b0f19; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0b0f19; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
-<body class="min-h-screen pb-24 selection:bg-accent selection:text-black">
-
-    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-    <!-- AUTH SCREEN -->
-    <div id="auth-screen" class="fixed inset-0 bg-darkbg z-50 flex items-center justify-center p-4">
-        <div class="bg-cardbg border border-gray-800 w-full max-w-sm rounded-3xl p-6 space-y-6 shadow-2xl relative overflow-hidden">
-            <div class="text-center space-y-2">
-                <div class="w-14 h-14 mx-auto bg-gradient-to-tr from-amber-500 to-yellow-300 rounded-2xl flex items-center justify-center text-darkbg font-black text-2xl shadow-lg shadow-amber-500/20">
-                    <i class="fa-solid fa-car-side"></i>
+<body class="bg-dark-900 text-gray-100 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-gold-500 selection:text-dark-900">
+        <!-- CONTENEUR AUTHENTIFICATION / APPLICATION -->
+    <div id="auth-container" class="fixed inset-0 z-50 bg-dark-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-dark-800 border border-dark-700 w-full max-w-md rounded-2xl p-6 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gold-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gold-500 text-2xl font-bold border border-gold-500/20">
+                    <i class="fa-solid fa-car"></i>
                 </div>
-                <h1 class="text-xl font-extrabold text-white" id="auth-title">Créer un compte Réel</h1>
-                <p class="text-xs text-gray-400">Plateforme d'investissement officielle</p>
+                <h2 id="auth-title" class="text-2xl font-bold text-white">Créer un compte Réel</h2>
+                <p class="text-xs text-gray-400 mt-1">Plateforme d'investissement officielle</p>
             </div>
-            <div class="grid grid-cols-2 gap-1 bg-gray-900 p-1 rounded-xl border border-gray-800">
-                <button onclick="setAuthMode('register')" id="tab-auth-reg" class="py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all">Inscription</button>
-                <button onclick="setAuthMode('login')" id="tab-auth-log" class="py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">Connexion</button>
+
+            <!-- Boutons bascule -->
+            <div class="flex bg-dark-900 p-1 rounded-xl mb-6 border border-dark-700">
+                <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 py-2 text-xs font-semibold rounded-lg bg-gold-500 text-dark-900 transition">Inscription</button>
+                <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 py-2 text-xs font-semibold rounded-lg text-gray-400 transition">Connexion</button>
             </div>
-            <div class="space-y-3">
-                <div id="group-username">
-                    <label class="block text-[11px] text-gray-400 mb-1">Nom d'utilisateur</label>
-                    <input type="text" id="auth-username" placeholder="Ex: Moussa" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+
+            <!-- Formulaire -->
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
+                <div id="group-name">
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Nom d'utilisateur</label>
+                    <input type="text" id="auth-name" placeholder="Ex: Moussa" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-gold-500">
                 </div>
                 <div>
-                    <label class="block text-[11px] text-gray-400 mb-1">Téléphone ou Email Admin</label>
-                    <input type="text" id="auth-phone" placeholder="Ex: msourabi610@gmail.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Téléphone ou Email Admin</label>
+                    <input type="text" id="auth-identifier" required placeholder="Ex: msourabi610@gmail.com" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-gold-500">
                 </div>
                 <div>
-                    <label class="block text-[11px] text-gray-400 mb-1">Mot de passe</label>
-                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Mot de passe</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-gold-500">
                 </div>
-            </div>
-            <button onclick="handleAuthSubmit()" id="auth-btn-submit" class="w-full bg-amber-500 hover:bg-amber-600 text-darkbg font-bold py-3 rounded-xl text-xs transition-all shadow-lg shadow-amber-500/20">
-                S'inscrire
-            </button>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-gold-500 hover:bg-gold-600 text-dark-900 font-bold py-3 rounded-xl transition shadow-lg shadow-gold-500/20 text-sm">S'inscrire</button>
+            </form>
         </div>
-                    </div>
-                        <!-- MAIN HEADER -->
-    <header class="sticky top-0 z-40 bg-darkbg/90 backdrop-blur-md border-b border-gray-800 px-4 py-3">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="bg-gradient-to-tr from-amber-500 to-yellow-300 p-2 rounded-xl text-darkbg font-extrabold shadow-lg shadow-amber-500/20">
-                    <i class="fa-solid fa-car-side text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-lg bg-gradient-to-r from-white via-gray-200 to-amber-400 bg-clip-text text-transparent">AutoInvest Pro</h1>
-                    <p class="text-[10px] text-emerald-400 font-medium flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Mode Réel Actif</p>
-                </div>
-            </div>
-            <a href="https://t.me/+LAPOnC3rQxw2Yzhk" target="_blank" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all">
-                <i class="fa-brands fa-telegram text-sm"></i> Telegram
-            </a>
-        </div>
-    </header>
-
-    <main class="max-w-md mx-auto px-4 py-4">
-        <!-- ACCUEIL CLIENT -->
-        <div id="tab-accueil" class="tab-content active space-y-4">
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 border border-gray-800 p-5 shadow-2xl">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-darkbg font-bold text-xl shadow-md" id="user-avatar-initial">U</div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-sm" id="display-username">Client</span>
-                                <span class="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">VIP Réel</span>
-                            </div>
-                            <p class="text-xs text-gray-400 font-mono">ID: <span id="display-userid">----</span></p>
-                        </div>
-                    </div>
-                    <button onclick="openDepositModal()" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg shadow-emerald-500/20 flex items-center gap-1">
-                        <i class="fa-solid fa-wallet"></i> Dépôt
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-800/80 text-center">
-                    <div class="bg-cardbg/60 p-2.5 rounded-xl border border-gray-800">
-                        <p class="text-[10px] text-gray-400 mb-1">Solde Principal (Dépôt)</p>
-                        <p class="font-bold text-xs text-emerald-400" id="balance-recharge">0 FCFA</p>
-                    </div>
-                    <div class="bg-cardbg/60 p-2.5 rounded-xl border border-gray-800">
-                        <p class="text-[10px] text-gray-400 mb-1">Solde Retirable (Gains)</p>
-                        <p class="font-bold text-xs text-amber-400" id="balance-withdraw">0 FCFA</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3 mt-4">
-                    <button onclick="openDepositModal()" class="bg-amber-500 hover:bg-amber-600 text-darkbg font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all">
-                        <i class="fa-solid fa-plus-circle"></i> Recharger (Min 2500F)
-                    </button>
-                    <button onclick="openWithdrawModal()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 border border-gray-700 transition-all">
-                        <i class="fa-solid fa-money-bill-transfer"></i> Retirer (Min 1100F)
-                    </button>
-                </div>
-            </div>
-
-            <!-- Liste des investissements actifs (Gains auto) -->
-            <div class="bg-cardbg rounded-2xl border border-gray-800 p-4">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-chart-line text-amber-400"></i> Mes Voitures en Production (Gains Auto)</h3>
-                    <span class="text-xs bg-gray-800 px-2 py-0.5 rounded text-gray-400 font-mono" id="active-count">0 actif(s)</span>
-                </div>
-                <div id="active-investments-container" class="space-y-3">
-                    <div class="text-center py-6 text-gray-500 text-xs">Aucun pack actif. Investissez pour générer des revenus automatiques chaque jour !</div>
-                </div>
-            </div>
     </div>
-            <!-- INVESTIR TAB -->
-        <div id="tab-investir" class="tab-content space-y-4">
-            <h2 class="font-extrabold text-base text-white flex items-center gap-2"><i class="fa-solid fa-car text-amber-400"></i> Catalogue d'Investissement Réel</h2>
-            <div id="plans-container" class="space-y-3"></div>
-        </div>
-
-        <!-- ADMIN TAB -->
-        <div id="tab-admin" class="tab-content space-y-4">
-            <div class="bg-cardbg border border-amber-500/30 rounded-2xl p-4 space-y-3">
-                <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-                    <h2 class="font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved text-amber-400"></i> Panneau Admin (Validation Dépôts)</h2>
-                    <span class="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">ADMIN</span>
+        <!-- PANNEAU ADMINISTRATEUR (Caché par défaut si non admin) -->
+    <div id="admin-panel" class="hidden fixed inset-0 z-50 bg-dark-900 overflow-y-auto custom-scrollbar p-4">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <div class="flex items-center justify-between bg-dark-800 p-4 rounded-2xl border border-dark-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white">Panneau Admin (Validation Dépôts)</h1>
+                        <p class="text-xs text-amber-400">Mode Réel Actif - Validation Admin Requise</p>
+                    </div>
                 </div>
-                <p class="text-[11px] text-gray-300">Validez les dépôts de vos clients pour créditer leur compte en FCFA instantanément.</p>
+                <button onclick="adminLogout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2 rounded-xl text-xs font-semibold transition">
+                    <i class="fa-solid fa-power-off mr-1"></i> Se déconnecter
+                </button>
+            </div>
+
+            <div class="bg-dark-800 border border-dark-700 rounded-2xl p-4 shadow-xl">
+                <p class="text-xs text-gray-400 mb-4">Validez les dépôts de vos clients pour créditer leur compte en FCFA explicitement.</p>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead>
-                            <tr class="border-b border-gray-800 text-gray-400">
-                                <th class="py-2 px-2">Type</th>
-                                <th class="py-2 px-2">Client</th>
-                                <th class="py-2 px-2">Montant</th>
-                                <th class="py-2 px-2">Réf / Tél</th>
-                                <th class="py-2 px-2 text-right">Actions</th>
+                            <tr class="border-b border-dark-700 text-gray-400">
+                                <th class="pb-3 px-2">Type</th>
+                                <th class="pb-3 px-2">Client</th>
+                                <th class="pb-3 px-2">Montant</th>
+                                <th class="pb-3 px-2">Réf / Tél</th>
+                                <th class="pb-3 px-2 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-requests-table">
-                            <tr><td colspan="5" class="text-center py-6 text-gray-500">Aucune demande en attente.</td></tr>
+                        <tbody id="admin-deposits-list">
+                            <!-- Rempli dynamiquement -->
                         </tbody>
                     </table>
                 </div>
             </div>
+        </div>
     </div>
-            <!-- COMPTE TAB -->
-        <div id="tab-compte" class="tab-content space-y-4">
-            <div class="bg-cardbg rounded-2xl border border-gray-800 p-4 space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b border-gray-800">
-                    <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-darkbg font-extrabold text-2xl shadow-lg" id="profile-avatar-large">U</div>
-                    <div>
-                        <h2 class="font-bold text-sm text-white" id="profile-username">Client VIP</h2>
-                        <p class="text-xs text-gray-400 font-mono">ID: <span id="profile-userid">----</span></p>
+        <!-- INTERFACE CLIENT PRINCIPALE -->
+    <div id="main-app" class="hidden flex-1 flex flex-col max-w-md mx-auto w-full pb-20 custom-scrollbar">
+        <!-- En-tête Utilisateur -->
+        <header class="bg-dark-800 border-b border-dark-700 p-4 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gold-500 text-dark-900 font-black rounded-xl flex items-center justify-center text-lg" id="user-avatar-initial">M</div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h2 class="font-bold text-white text-sm" id="user-display-name">Moussa</h2>
+                        <span class="bg-gold-500/20 text-gold-500 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gold-500/30" id="user-vip-badge">VIP 0</span>
                     </div>
+                    <p class="text-[10px] text-gray-400">ID : <span id="user-id-display">109958</span></p>
                 </div>
-                <button onclick="logoutAccount()" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 py-2.5 rounded-xl text-xs font-bold transition-all">
-                    Se déconnecter
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="openDepositModal()" class="bg-gold-500 hover:bg-gold-600 text-dark-900 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 shadow-md">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span>Dépôt</span>
                 </button>
             </div>
-        </div>
-    </main>
+        </header>
 
-    <!-- Navigation Basse -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-darkbg/95 backdrop-blur-md border-t border-gray-800 z-40 py-2">
-        <div class="max-w-md mx-auto grid grid-cols-3 text-center" id="bottom-nav-bar">
-            <button onclick="switchTab('accueil')" id="nav-accueil" class="flex flex-col items-center justify-center text-amber-400 transition-all">
-                <i class="fa-solid fa-house text-lg mb-0.5"></i>
-                <span class="text-[10px] font-medium">Accueil</span>
-            </button>
-            <button onclick="switchTab('investir')" id="nav-investir" class="flex flex-col items-center justify-center text-gray-400 hover:text-amber-400 transition-all">
-                <i class="fa-solid fa-car text-lg mb-0.5"></i>
-                <span class="text-[10px] font-medium">Investir</span>
-            </button>
-            <button onclick="switchTab('compte')" id="nav-compte" class="flex flex-col items-center justify-center text-gray-400 hover:text-amber-400 transition-all">
-                <i class="fa-solid fa-user text-lg mb-0.5"></i>
-                <span class="text-[10px] font-medium">Compte</span>
-            </button>
-        </div>
-    </nav>
+        <!-- Soldes & Statistiques -->
+        <main class="p-4 space-y-4 flex-1">
+            <div class="bg-gradient-to-br from-dark-800 to-dark-700 border border-dark-700 rounded-2xl p-4 shadow-xl space-y-4">
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-dark-900/50 p-2.5 rounded-xl border border-dark-700/50">
+                        <span class="block text-[10px] text-gray-400">Solde Dépôt</span>
+                        <span class="text-sm font-black text-white" id="balance-deposit">0 FCFA</span>
+                    </div>
+                    <div class="bg-dark-900/50 p-2.5 rounded-xl border border-dark-700/50">
+                        <span class="block text-[10px] text-gray-400">Solde Retrait</span>
+                        <span class="text-sm font-black text-white" id="balance-withdraw">0 FCFA</span>
+                    </div>
+                    <div class="bg-dark-900/50 p-2.5 rounded-xl border border-dark-700/50">
+                        <span class="block text-[10px] text-gray-400">Revenus Total</span>
+                        <span class="text-sm font-black text-white" id="balance-total">0 FCFA</span>
+                    </div>
+                </div>
 
-    <!-- Modals -->
-    <div id="modal-deposit" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cardbg border border-gray-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-sm text-white">Recharger le compte (Min: 2500F)</h3>
+                <div class="flex space-x-2">
+                    <button onclick="openDepositModal()" class="flex-1 bg-gold-500 hover:bg-gold-600 text-dark-900 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Recharger (Min 2500F)</span>
+                    </button>
+                    <button onclick="openWithdrawModal()" class="flex-1 bg-dark-900 hover:bg-dark-600 text-gray-200 border border-dark-700 font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition">
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                        <span>Retirer (Min 1100F)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Catalogue d'investissement -->
+            <div class="space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 px-1"><i class="fa-solid fa-car-side text-gold-500 mr-1"></i> Catalogue de Vente & Investissement</h3>
+                <div class="space-y-3" id="investment-catalog">
+                    <!-- Généré dynamiquement -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Navigation mobile en bas -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-dark-800/90 backdrop-blur-md border-t border-dark-700 py-2 px-6 flex justify-between items-center z-40">
+            <button onclick="switchTab('accueil')" class="text-gold-500 flex flex-col items-center text-[10px] font-medium space-y-1">
+                <i class="fa-solid fa-house text-base"></i><span>Accueil</span>
+            </button>
+            <button onclick="switchTab('compte')" class="text-gray-400 flex flex-col items-center text-[10px] font-medium space-y-1">
+                <i class="fa-solid fa-user text-base"></i><span>Compte</span>
+            </button>
+        </nav>
+    </div>
+        <!-- MODALE DE DEPOT -->
+    <div id="deposit-modal" class="hidden fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-dark-800 border border-dark-700 w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-white"><i class="fa-solid fa-wallet text-gold-500 mr-2"></i> Effectuer un Dépôt Réel</h3>
                 <button onclick="closeDepositModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div class="bg-blue-900/20 border border-blue-500/30 p-3 rounded-xl text-[11px] text-blue-200">
-                Envoyez via Wave ou MTN au : <strong class="text-amber-400">+225 0596180495</strong>
+            <div class="bg-dark-900 p-3 rounded-xl border border-dark-700 text-xs space-y-1 text-gray-300">
+                <p>Effectuez votre dépôt Wave ou MTN Money sur le numéro officiel ci-dessous.</p>
+                <p class="font-bold text-gold-500">Minimum : 2.500 FCFA.</p>
+                <div class="pt-2 border-t border-dark-700 flex justify-between items-center">
+                    <span>WAVE : <strong class="text-white">+225 0596180495</strong></span>
+                    <span>MTN : <strong class="text-white">+225 0596180495</strong></span>
+                </div>
             </div>
-            <div class="space-y-3">
-                <input type="number" id="deposit-amount" min="2500" value="2500" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white">
-                <input type="text" id="deposit-ref" placeholder="Numéro de transaction Wave/MTN" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white">
-            </div>
-            <button onclick="submitDeposit()" class="w-full bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs">Soumettre le dépôt</button>
+            <form onsubmit="submitDepositRequest(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Montant à déposer (FCFA)</label>
+                    <input type="number" id="deposit-amount" min="2500" required placeholder="2500" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Référence / Numéro de transaction</label>
+                    <input type="text" id="deposit-ref" required placeholder="Ex: TX-9843217" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500">
+                </div>
+                <button type="submit" class="w-full bg-gold-500 hover:bg-gold-600 text-dark-900 font-bold py-3 rounded-xl text-xs transition">Confirmer le dépôt (En attente admin)</button>
+            </form>
         </div>
     </div>
 
-    <div id="modal-withdraw" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cardbg border border-gray-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-sm text-white">Retirer les gains (Min: 1100F)</h3>
-                <button onclick="closeWithdrawModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-3">
-                <input type="number" id="withdraw-amount" min="1100" placeholder="Montant" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white">
-                <input type="text" id="withdraw-phone" placeholder="Votre numéro Mobile Money / Wave" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white">
-            </div>
-            <button onclick="submitWithdraw()" class="w-full bg-amber-500 text-darkbg font-bold py-2.5 rounded-xl text-xs">Demander le retrait</button>
-        </div>
-                    </div>
-                        <script>
-        const plans = [
-            { id: 'c1', name: 'VIP 1 - Berline Urbaine', price: 2500, daily: 500, days: 20, total: 10000, img: 'https://images.unsplash.com/photo-1555353540-64580b51c258?auto=format&fit=crop&w=600&q=80', vipLevel: 'VIP 1' },
-            { id: 'c2', name: 'VIP 2 - SUV Sportif', price: 3500, daily: 1000, days: 20, total: 20000, img: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80', vipLevel: 'VIP 2' },
-            { id: 'c3', name: 'VIP 3 - GT de Luxe', price: 4500, daily: 2100, days: 30, total: 63000, img: 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=600&q=80', vipLevel: 'VIP 3' },
-            { id: 'c4', name: 'SIPV 1 - Supercar Compétition', price: 30000, daily: 5000, days: 20, total: 100000, img: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80', vipLevel: 'SIPV 1' }
-        ];
+    <!-- SCRIPT DE GESTION DU CODE ET DU MODE REEL -->
+    <script>
+        // Stockage global local simulé pour la persistance GitHub/Navigateur
+        let db = JSON.parse(localStorage.getItem('autoinvest_db')) || {
+            users: [],
+            currentUser: null,
+            isAdmin: false,
+            deposits: [] // Contient les dépôts en attente de validation admin
+        };
 
-        let currentUser = null;
-
-        function handleAuthSubmit() {
-            const phoneOrEmail = document.getElementById('auth-phone').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
-            const username = document.getElementById('auth-username').value.trim();
-
-            if (!phoneOrEmail || !password) {
-                showToast("Veuillez remplir tous les champs.", "error");
-                return;
-            }
-
-            // Accès Administrateur requis
-            if (phoneOrEmail === 'msourabi610@gmail.com' && password === '00000') {
-                currentUser = { id: 'ADMIN', username: 'Administrateur', phone: 'msourabi610@gmail.com', isAdmin: true };
-                localStorage.setItem('autoinvest_current_session', 'msourabi610@gmail.com');
-                closeAuthScreen();
-                setupAdminUI();
-                showToast("Connexion Administrateur réussie !", "success");
-                return;
-            }
-
-            let usersDb = JSON.parse(localStorage.getItem('autoinvest_users_db') || '{}');
-            const isReg = document.getElementById('tab-auth-reg').classList.contains('bg-amber-500');
-
-            if (isReg) {
-                if (!username) { showToast("Entrez un nom d'utilisateur.", "error"); return; }
-                if (usersDb[phoneOrEmail]) { showToast("Ce compte existe déjà. Connectez-vous.", "error"); return; }
-                
-                currentUser = {
-                    id: Math.floor(100000 + Math.random() * 900000).toString(),
-                    username: username,
-                    phone: phoneOrEmail,
-                    password: password,
-                    isAdmin: false,
-                    balanceRecharge: 0,
-                    balanceWithdraw: 0,
-                    activeInvestments: []
-                };
-                usersDb[phoneOrEmail] = currentUser;
-                localStorage.setItem('autoinvest_users_db', JSON.stringify(usersDb));
-            } else {
-                if (!usersDb[phoneOrEmail] || usersDb[phoneOrEmail].password !== password) {
-                    showToast("Identifiants incorrects.", "error");
-                    return;
-                }
-                currentUser = usersDb[phoneOrEmail];
-            }
-
-            localStorage.setItem('autoinvest_current_session', phoneOrEmail);
-            closeAuthScreen();
-            updateUI();
-            showToast("Connexion réussie !", "success");
+        function saveDB() {
+            localStorage.setItem('autoinvest_db', JSON.stringify(db));
         }
 
-        function setAuthMode(mode) {
-            const regBtn = document.getElementById('tab-auth-reg');
-            const logBtn = document.getElementById('tab-auth-log');
-            const groupUser = document.getElementById('group-username');
-            const submitBtn = document.getElementById('auth-btn-submit');
-            
-            if (mode === 'register') {
-                regBtn.className = "py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all";
-                logBtn.className = "py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
-                groupUser.style.display = 'block';
-                submitBtn.innerText = "S'inscrire";
-            } else {
-                logBtn.className = "py-2 text-xs font-bold rounded-lg bg-amber-500 text-darkbg transition-all";
-                regBtn.className = "py-2 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
-                groupUser.style.display = 'none';
-                submitBtn.innerText = "Se connecter";
+        function switchAuthTab(tab) {
+            const isReg = tab === 'register';
+            document.getElementById('auth-title').innerText = isReg ? "Créer un compte Réel" : "Connexion Client / Admin";
+            document.getElementById('group-name').style.display = isReg ? 'block' : 'none';
+            document.getElementById('auth-submit-btn').innerText = isReg ? "S'inscrire" : "Se connecter";
+            document.getElementById('tab-register-btn').className = `flex-1 py-2 text-xs font-semibold rounded-lg transition ${isReg ? 'bg-gold-500 text-dark-900' : 'text-gray-400'}`;
+            document.getElementById('tab-login-btn').className = `flex-1 py-2 text-xs font-semibold rounded-lg transition ${!isReg ? 'bg-gold-500 text-dark-900' : 'text-gray-400'}`;
+        }
+
+        function handleAuth(event) {
+            event.preventDefault();
+            const identifier = document.getElementById('auth-identifier').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const nameInput = document.getElementById('auth-name').value.trim();
+
+            // Vérification Compte Admin Fixe
+            if (identifier === 'msourabi610@gmail.com') {
+                db.isAdmin = true;
+                db.currentUser = { name: "Administrateur", id: "ADMIN" };
+                saveDB();
+                checkSession();
+                return;
             }
+
+            // Gestion Utilisateur Standard
+            let user = db.users.find(u => u.identifier === identifier);
+            if (document.getElementById('group-name').style.display !== 'none') {
+                if (user) {
+                    alert("Cet identifiant existe déjà !");
+                    return;
+                }
+                user = {
+                    name: nameInput || "Moussa",
+                    identifier: identifier,
+                    password: password,
+                    id: Math.floor(100000 + Math.random() * 900000),
+                    balanceDeposit: 0,
+                    balanceWithdraw: 0,
+                    revenueTotal: 0
+                };
+                db.users.push(user);
+            } else {
+                if (!user || user.password !== password) {
+                    alert("Identifiant ou mot de passe incorrect !");
+                    return;
+                }
+            }
+
+            db.isAdmin = false;
+            db.currentUser = user;
+            saveDB();
+            checkSession();
         }
 
         function checkSession() {
-            const sessionKey = localStorage.getItem('autoinvest_current_session');
-            if (sessionKey === 'msourabi610@gmail.com') {
-                currentUser = { id: 'ADMIN', username: 'Administrateur', phone: 'msourabi610@gmail.com', isAdmin: true };
-                closeAuthScreen();
-                setupAdminUI();
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+
+            if (db.isAdmin) {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                renderAdminDeposits();
+            } else if (db.currentUser) {
+                document.getElementById('main-app').classList.remove('hidden');
+                updateUI();
+            } else {
+                document.getElementById('auth-container').classList.remove('hidden');
+            }
+        }
+
+        function adminLogout() {
+            db.isAdmin = false;
+            db.currentUser = null;
+            saveDB();
+            checkSession();
+        }
+
+        function openDepositModal() { document.getElementById('deposit-modal').classList.remove('hidden'); }
+        function closeDepositModal() { document.getElementById('deposit-modal').classList.add('hidden'); }
+
+        function submitDepositRequest(event) {
+            event.preventDefault();
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            const reference = document.getElementById('deposit-ref').value.trim();
+
+            if (amount < 2500) {
+                alert("Le montant minimum de dépôt est de 2500 FCFA.");
                 return;
             }
-            if (sessionKey) {
-                let usersDb = JSON.parse(localStorage.getItem('autoinvest_users_db') || '{}');
-                if (usersDb[sessionKey]) {
-                    currentUser = usersDb[sessionKey];
-                    checkAutomaticEarnings(currentUser);
-                    closeAuthScreen();
-                    updateUI();
-                    return;
-                }
-            }
-            document.getElementById('auth-screen').classList.remove('hidden');
-        }
 
-        // Gains automatiques en temps réel basés sur les jours écoulés
-        function checkAutomaticEarnings(user) {
-            if (!user.activeInvestments || user.activeInvestments.length === 0) return;
-            const now = Date.now();
-            let updated = false;
-            const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-            user.activeInvestments = user.activeInvestments.map(inv => {
-                if (inv.daysLeft <= 0) return inv;
-                const elapsedDays = Math.floor((now - inv.lastCollectedTime) / ONE_DAY_MS);
-                if (elapsedDays > 0) {
-                    const daysToProcess = Math.min(elapsedDays, inv.daysLeft);
-                    user.balanceWithdraw += (daysToProcess * inv.daily);
-                    inv.daysLeft -= daysToProcess;
-                    inv.lastCollectedTime += (daysToProcess * ONE_DAY_MS);
-                    updated = true;
-                }
-                return inv;
+            // Enregistrement d'un dépôt en mode "En attente" strict (Mode Réel)
+            db.deposits.push({
+                id: Date.now(),
+                userClient: db.currentUser.name,
+                userUuid: db.currentUser.id,
+                amount: amount,
+                ref: reference,
+                status: 'pending'
             });
 
-            if (updated) saveUserData();
+            saveDB();
+            closeDepositModal();
+            alert("Demande de dépôt enregistrée avec succès ! Elle est en attente de validation par l'administrateur.");
+            updateUI();
         }
 
-        function setupAdminUI() {
-            document.getElementById('bottom-nav-bar').innerHTML = `
-                <button onclick="switchTab('admin')" class="flex flex-col items-center justify-center text-amber-400 transition-all col-span-3">
-                    <i class="fa-solid fa-shield-halved text-lg mb-0.5"></i>
-                    <span class="text-[10px] font-medium">Panneau Admin (Validation)</span>
-                </button>
-            `;
-            switchTab('admin');
-            renderAdminRequests();
+        function renderAdminDeposits() {
+            const list = document.getElementById('admin-deposits-list');
+            list.innerHTML = '';
+            const pending = db.deposits.filter(d => d.status === 'pending');
+
+            if (pending.length === 0) {
+                list.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500">Aucune demande en attente.</td></tr>`;
+                return;
+            }
+
+            pending.forEach(dep => {
+                list.innerHTML += `
+                    <tr class="border-b border-dark-700/50">
+                        <td class="py-3 px-2 font-bold text-gold-500">Dépôt</td>
+                        <td class="py-3 px-2 text-white">${dep.userClient} (ID: ${dep.userUuid})</td>
+                        <td class="py-3 px-2 text-white font-black">${dep.amount} FCFA</td>
+                        <td class="py-3 px-2 text-gray-400">${dep.ref}</td>
+                        <td class="py-3 px-2 text-right space-x-1">
+                            <button onclick="approveDeposit(${dep.id})" class="bg-green-500/20 text-green-400 border border-green-500/30 px-2.5 py-1 rounded-lg font-bold">Valider</button>
+                            <button onclick="rejectDeposit(${dep.id})" class="bg-red-500/20 text-red-400 border border-red-500/30 px-2.5 py-1 rounded-lg font-bold">Rejeter</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function approveDeposit(depId) {
+            const dep = db.deposits.find(d => d.id === depId);
+            if (!dep) return;
+            dep.status = 'approved';
+
+            // Créditer le compte réel de l'utilisateur concerné
+            let targetUser = db.users.find(u => u.id === dep.userUuid);
+            if (targetUser) {
+                targetUser.balanceDeposit += dep.amount;
+            }
+
+            saveDB();
+            renderAdminDeposits();
+            alert("Dépôt validé et crédité avec succès sur le compte client !");
+        }
+
+        function rejectDeposit(depId) {
+            const dep = db.deposits.find(d => d.id === depId);
+            if (!dep) return;
+            dep.status = 'rejected';
+            saveDB();
+            renderAdminDeposits();
+            alert("Dépôt rejeté.");
         }
 
         function updateUI() {
-            if (!currentUser || currentUser.isAdmin) return;
-            document.getElementById('balance-recharge').innerText = currentUser.balanceRecharge.toLocaleString() + ' FCFA';
-            document.getElementById('balance-withdraw').innerText = currentUser.balanceWithdraw.toLocaleString() + ' FCFA';
-            document.getElementById('display-userid').innerText = currentUser.id;
-            document.getElementById('display-username').innerText = currentUser.username;
-            document.getElementById('profile-username').innerText = currentUser.username;
-            document.getElementById('profile-userid').innerText = currentUser.id;
-            renderActiveInvestments();
-            renderPlans();
-        }
+            if (!db.currentUser) return;
+            document.getElementById('user-display-name').innerText = db.currentUser.name;
+            document.getElementById('user-id-display').innerText = db.currentUser.id;
+            document.getElementById('user-avatar-initial').innerText = db.currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('balance-deposit').innerText = db.currentUser.balanceDeposit + " FCFA";
+            document.getElementById('balance-withdraw').innerText = db.currentUser.balanceWithdraw + " FCFA";
+            document.getElementById('balance-total').innerText = db.currentUser.revenueTotal + " FCFA";
 
-        function saveUserData() {
-            if (!currentUser || currentUser.isAdmin) return;
-            let usersDb = JSON.parse(localStorage.getItem('autoinvest_users_db') || '{}');
-            usersDb[currentUser.phone] = currentUser;
-            localStorage.setItem('autoinvest_users_db', JSON.stringify(usersDb));
-        }
-
-        function renderPlans() {
-            const container = document.getElementById('plans-container');
-            container.innerHTML = plans.map(p => `
-                <div class="bg-cardbg rounded-2xl border border-gray-800 overflow-hidden shadow-lg">
-                    <div class="relative h-32">
-                        <img src="${p.img}" class="w-full h-full object-cover">
-                        <div class="absolute top-2 left-2 bg-amber-500 text-darkbg font-extrabold text-[10px] px-2 py-0.5 rounded-full">${p.vipLevel}</div>
+            // Rendu Catalogue
+            const catalog = document.getElementById('investment-catalog');
+            catalog.innerHTML = `
+                <div class="bg-dark-800 border border-dark-700 rounded-2xl overflow-hidden p-3 flex space-x-3 items-center">
+                    <div class="w-20 h-20 bg-dark-900 rounded-xl flex items-center justify-center text-gold-500 text-xl border border-dark-700">
+                        <i class="fa-solid fa-car"></i>
                     </div>
-                    <div class="p-4 space-y-2">
-                        <h3 class="font-bold text-sm text-white">${p.name}</h3>
-                        <div class="flex justify-between text-xs text-gray-400">
-                            <span>Gain/jour: <strong class="text-emerald-400">+${p.daily.toLocaleString()} F</strong></span>
-                            <span>Durée: <strong class="text-white">${p.days} Jours</strong></span>
-                        </div>
-                        <div class="flex justify-between items-center pt-2 border-t border-gray-800">
-                            <span class="text-xs font-bold text-white">${p.price.toLocaleString()} FCFA</span>
-                            <button onclick="investInPlan('${p.id}')" class="bg-amber-500 hover:bg-amber-600 text-darkbg font-bold px-3 py-1.5 rounded-xl text-xs">Investir</button>
-                        </div>
+                    <div class="flex-1 space-y-1">
+                        <span class="text-[10px] bg-gold-500/10 text-gold-500 px-2 py-0.5 rounded font-bold">VIP 1 - Berline Urbaine</span>
+                        <h4 class="text-xs font-bold text-white">Quotidien +500 F</h4>
+                        <p class="text-[10px] text-gray-400">Prix : 2500 FCFA</p>
                     </div>
                 </div>
-            `).join('');
+            `;
         }
 
-        function investInPlan(planId) {
-            const plan = plans.find(p => p.id === planId);
-            if (!plan) return;
-
-            if (currentUser.balanceRecharge < plan.price) {
-                showToast("Solde principal insuffisant ! Faites un dépôt.", "error");
-                openDepositModal();
-                return;
-            }
-
-            currentUser.balanceRecharge -= plan.price;
-            currentUser.activeInvestments.push({
-                id: Date.now(),
-                name: plan.name,
-                daily: plan.daily,
-                total: plan.total,
-                daysLeft: plan.days,
-                lastCollectedTime: Date.now()
-            });
-
-            saveUserData();
-            updateUI();
-            showToast(`Investissement réussi dans "${plan.name}" ! Gains automatiques activés.`, "success");
-            switchTab('accueil');
-        }
-
-        function renderActiveInvestments() {
-            const container = document.getElementById('active-investments-container');
-            document.getElementById('active-count').innerText = currentUser.activeInvestments.length + ' actif(s)';
-            if (currentUser.activeInvestments.length === 0) {
-                container.innerHTML = `<div class="text-center py-6 text-gray-500 text-xs">Aucun pack actif.</div>`;
-                return;
-            }
-            container.innerHTML = currentUser.activeInvestments.map(inv => `
-                <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800 space-y-1">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-xs text-white">${inv.name}</span>
-                        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">Auto ⚡</span>
-                    </div>
-                    <div class="flex justify-between text-[11px] text-gray-400">
-                        <span>Chaque jour: <strong class="text-emerald-400">+${inv.daily.toLocaleString()} F</strong></span>
-                        <span>Restant: <strong class="text-amber-400">${inv.daysLeft} jours</strong></span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function submitDeposit() {
-            const amount = parseInt(document.getElementById('deposit-amount').value);
-            const ref = document.getElementById('deposit-ref').value.trim();
-            if (isNaN(amount) || amount < 2500 || !ref) { showToast("Entrez un montant valide (Min 2500F) et la référence.", "error"); return; }
-
-            let requests = JSON.parse(localStorage.getItem('autoinvest_requests') || '[]');
-            requests.push({ id: Date.now(), type: 'Dépôt', user: currentUser.username, phone: currentUser.phone, amount: amount, details: ref });
-            localStorage.setItem('autoinvest_requests', JSON.stringify(requests));
-
-            closeDepositModal();
-            showToast("Demande de dépôt envoyée à l'administrateur.", "success");
-        }
-
-        function submitWithdraw() {
-            const amount = parseInt(document.getElementById('withdraw-amount').value);
-            const phone = document.getElementById('withdraw-phone').value.trim();
-            if (isNaN(amount) || amount < 1100 || !phone) { showToast("Minimum 1,100 FCFA requis.", "error"); return; }
-            if (amount > currentUser.balanceWithdraw) { showToast("Solde retirable insuffisant.", "error"); return; }
-
-            currentUser.balanceWithdraw -= amount;
-            saveUserData();
-            updateUI();
-            closeWithdrawModal();
-            showToast(`Retrait de ${amount.toLocaleString()} FCFA demandé avec succès !`, "success");
-        }
-
-        function renderAdminRequests() {
-            const container = document.getElementById('admin-requests-table');
-            let requests = JSON.parse(localStorage.getItem('autoinvest_requests') || '[]');
-            if (requests.length === 0) {
-                container.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500">Aucune demande en attente.</td></tr>`;
-                return;
-            }
-            container.innerHTML = requests.map(req => `
-                <tr class="border-b border-gray-800/60">
-                    <td class="py-2 px-2 font-bold text-emerald-400">${req.type}</td>
-                    <td class="py-2 px-2 text-white">${req.user}</td>
-                    <td class="py-2 px-2 font-mono text-white">${req.amount.toLocaleString()} F</td>
-                    <td class="py-2 px-2 text-gray-400 font-mono text-[10px]">${req.details}</td>
-                    <td class="py-2 px-2 text-right">
-                        <button onclick="processRequest(${req.id}, true)" class="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white px-2 py-1 rounded text-[10px] font-bold">Valider</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function processRequest(reqId, approved) {
-            let requests = JSON.parse(localStorage.getItem('autoinvest_requests') || '[]');
-            const index = requests.findIndex(r => r.id === reqId);
-            if (index === -1) return;
-            const req = requests[index];
-
-            if (approved) {
-                let usersDb = JSON.parse(localStorage.getItem('autoinvest_users_db') || '{}');
-                if (usersDb[req.phone]) {
-                    usersDb[req.phone].balanceRecharge += req.amount;
-                    localStorage.setItem('autoinvest_users_db', JSON.stringify(usersDb));
-                }
-                showToast(`Dépôt de ${req.amount}F validé pour ${req.user} !`, "success");
-            }
-            requests.splice(index, 1);
-            localStorage.setItem('autoinvest_requests', JSON.stringify(requests));
-            renderAdminRequests();
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function openDepositModal() { document.getElementById('modal-deposit').classList.remove('hidden'); }
-        function closeDepositModal() { document.getElementById('modal-deposit').classList.add('hidden'); }
-        function openWithdrawModal() { document.getElementById('modal-withdraw').classList.remove('hidden'); }
-        function closeWithdrawModal() { document.getElementById('modal-withdraw').classList.add('hidden'); }
-        function closeAuthScreen() { document.getElementById('auth-screen').classList.add('hidden'); }
-        function logoutAccount() { localStorage.removeItem('autoinvest_current_session'); location.reload(); }
-
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'} text-white px-4 py-3 rounded-xl shadow-xl text-xs font-medium`;
-            toast.innerText = message;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
-        }
-
-        window.onload = function() { checkSession(); }
+        // Lancement initial de vérification au chargement de la page
+        window.onload = function() {
+            checkSession();
+        };
     </script>
 </body>
-</html>
+    </html>
+    
