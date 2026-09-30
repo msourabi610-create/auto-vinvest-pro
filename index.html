@@ -1,960 +1,862 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoInvest Pro - Plateforme d'Investissement Automobile</title>
+    <title>Auto Invest - Plateforme VIP (20 Plans mis à jour)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        dark: {
-                            900: '#0b0f19',
-                            800: '#111827',
-                            700: '#1f2937',
-                            600: '#374151',
-                        }
+                        darkBg: '#0b1120',
+                        cardBg: '#1e293b',
+                        accentOrange: '#f97316',
+                        accentGold: '#eab308'
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            background-color: #0b1120;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .gradient-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        .btn-orange {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+        }
     </style>
 </head>
-<body class="bg-dark-900 text-gray-100 min-h-screen flex flex-col selection:bg-amber-500 selection:text-black">
+<body class="pb-28">
 
-    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+    <!-- ÉCRAN D'AUTHENTIFICATION -->
+    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="gradient-card border border-slate-700/60 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-6">
+            <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700/60">
+                <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-orange-500 text-white shadow">Se connecter</button>
+                <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white">S'inscrire</button>
+            </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div id="app" class="flex-1 flex flex-col">
-        <!-- Dynamic views rendered via JavaScript -->
+            <!-- CONNEXION -->
+            <div id="loginFormContainer" class="space-y-4">
+                <div class="text-center space-y-1">
+                    <div class="w-12 h-12 bg-orange-500/25 text-orange-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-orange-500/30">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white">Bon retour !</h2>
+                    <p class="text-xs text-slate-400">Entrez votre email et votre mot de passe</p>
+                </div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-slate-300">Votre email</label>
+                        <input type="email" id="loginEmail" required placeholder="monemail@gmail.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-slate-300">Mot de passe</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                    <button type="submit" class="w-full btn-orange text-white py-3 rounded-xl text-sm font-bold shadow-lg hover:opacity-95 transition">Se connecter</button>
+                </form>
+            </div>
+
+            <!-- INSCRIPTION -->
+            <div id="registerFormContainer" class="space-y-4 hidden">
+                <div class="text-center space-y-1">
+                    <div class="w-12 h-12 bg-amber-500/25 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-amber-500/30">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white">Créer un compte</h2>
+                </div>
+                <form onsubmit="handleRegister(event)" class="space-y-3">
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-slate-300">Votre email</label>
+                        <input type="email" id="regEmail" required placeholder="monemail@gmail.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-slate-300">Mot de passe</label>
+                        <input type="password" id="regPassword" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-medium text-slate-300">Téléphone</label>
+                        <input type="tel" id="regPhone" required placeholder="+225 XX XX XX XX" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                    </div>
+                    <button type="submit" class="w-full btn-orange text-white py-2.5 rounded-xl text-sm font-bold shadow-lg hover:opacity-95 transition">S'inscrire</button>
+                </form>
+            </div>
+        </div>
     </div>
-        <!-- JavaScript Application Logic -->
-    <script>
-        const STORAGE_KEY = 'autoinvest_platform_db_v1';
 
-        // Initial default state if localStorage is empty
-        const defaultDb = {
-            users: [
-                {
-                    id: 'usr_admin',
-                    name: 'Administrateur Principal',
-                    email: 'msourabi610@gmail.com',
-                    password: '00000',
-                    role: 'admin',
-                    balance: 5000000,
-                    totalInvested: 0,
-                    totalEarned: 0,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 'usr_demo1',
-                    name: 'Jean Kouassi',
-                    email: 'jean@example.com',
-                    password: 'password',
-                    role: 'user',
-                    balance: 25000,
-                    totalInvested: 50000,
-                    totalEarned: 4500,
-                    createdAt: new Date().toISOString()
-                }
-            ],
-            vehicles: [
-                {
-                    id: 'veh_1',
-                    name: 'Moto Taxi Standard (Bajaj)',
-                    type: 'Moto',
-                    price: 25000,
-                    dailyReturn: 2000,
-                    durationDays: 30,
-                    image: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80',
-                    features: ['Contrat 30 jours', 'Rendement journalier garanti', 'Assurance incluse']
-                },
-                {
-                    id: 'veh_2',
-                    name: 'Taxi Urbain (Toyota Corolla)',
-                    type: 'Voiture',
-                    price: 100000,
-                    dailyReturn: 9000,
-                    durationDays: 45,
-                    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80',
-                    features: ['Chauffeur professionnel', 'Maintenance prise en charge', 'Paiement journalier']
-                },
-                {
-                    id: 'veh_3',
-                    name: 'Voiture VOD (Confort)',
-                    type: 'Voiture Luxe',
-                    price: 350000,
-                    dailyReturn: 35000,
-                    durationDays: 60,
-                    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80',
-                    features: ['Plateforme VTC partenaire', 'Rapport hebdomadaire', 'Priorité maintenance']
-                },
-                {
-                    id: 'veh_4',
-                    name: 'Camionnette de Livraison',
-                    type: 'Utilitaire',
-                    price: 750000,
-                    dailyReturn: 85000,
-                    durationDays: 90,
-                    image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=600&q=80',
-                    features: ['Contrat logistique B2B', 'Gains élevés', 'Sécurisation maximale']
-                }
-            ],
-            investments: [
-                {
-                    id: 'inv_demo1',
-                    userId: 'usr_demo1',
-                    userName: 'Jean Kouassi',
-                    vehicleId: 'veh_2',
-                    vehicleName: 'Taxi Urbain (Toyota Corolla)',
-                    amount: 100000,
-                    dailyReturn: 9000,
-                    daysRemaining: 40,
-                    totalCollected: 45000,
-                    startDate: new Date(Date.now() - 5 * 86400000).toISOString(),
-                    status: 'active'
-                }
-            ],
-            deposits: [
-                {
-                    id: 'dep_demo1',
-                    userId: 'usr_demo1',
-                    userName: 'Jean Kouassi',
-                    amount: 50000,
-                    method: 'Orange Money CI',
-                    reference: 'OM-987654321',
-                    date: new Date(Date.now() - 3600000).toISOString(),
-                    status: 'pending'
-                }
-            ],
-            withdrawals: [
-                {
-                    id: 'wit_demo1',
-                    userId: 'usr_demo1',
-                    userName: 'Jean Kouassi',
-                    amount: 15000,
-                    method: 'MTN Mobile Money',
-                    phone: '+225 0700000000',
-                    date: new Date(Date.now() - 7200000).toISOString(),
-                    status: 'pending'
-                }
-            ],
-            session: null
-        };
+    <!-- APPLICATION PRINCIPALE -->
+    <div id="dashboardApp" class="hidden">
+        <header class="bg-slate-900/80 backdrop-blur border-b border-slate-800 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2 bg-slate-800 text-slate-200 px-3 py-1.5 rounded-full text-xs font-medium border border-slate-700">
+                <i class="fa-solid fa-car text-orange-500"></i>
+                <span id="headerTitle">Auto Invest 🚗</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="https://t.me/+LAPOnC3rQxw2Yzhk" target="_blank" class="bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1 transition">
+                    <i class="fa-brands fa-telegram"></i>
+                    <span>Telegram</span>
+                </a>
+                <button onclick="logout()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 px-2.5 py-1.5 rounded-full text-xs font-semibold border border-rose-500/30 transition">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </header>
 
-        function getDB() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (!data) {
-                saveDB(defaultDb);
-                return defaultDb;
-            }
-            return JSON.parse(data);
-        }
-
-        function saveDB(db) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-        }
-
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bg = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-rose-600' : 'bg-blue-600';
-            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+        <main class="max-w-md mx-auto p-4 space-y-4">
             
-            toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 pointer-events-auto transform translate-y-2 opacity-0 transition-all duration-300`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span class="text-sm font-medium">${message}</span>`;
+            <!-- PANNEAU ADMIN -->
+            <div id="adminPanel" class="hidden gradient-card border-2 border-orange-500/60 rounded-2xl p-4 shadow-2xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                    <h3 class="text-xs font-extrabold text-orange-400 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-user-shield text-sm"></i>
+                        <span>Panneau Administrateur</span>
+                    </h3>
+                    <span class="bg-orange-500/20 text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded border border-orange-500/30">ACTIF</span>
+                </div>
+                
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-xs font-bold text-slate-300 mb-1">Validation des Dépôts :</p>
+                        <div id="adminDepositsList" class="space-y-2 max-h-32 overflow-y-auto">
+                            <p class="text-[11px] text-slate-500 italic text-center py-2">Aucun dépôt en attente.</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-700 pt-2">
+                        <p class="text-xs font-bold text-slate-300 mb-1">Validation des Retraits (Nuit) :</p>
+                        <div id="adminWithdrawalsList" class="space-y-2 max-h-32 overflow-y-auto">
+                            <p class="text-[11px] text-slate-500 italic text-center py-2">Aucun retrait de nuit en attente.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VUE ACCUEIL ================= -->
+            <div id="view-accueil" class="space-y-4">
+                <!-- Soldes -->
+                <div class="gradient-card border border-slate-700/60 rounded-2xl p-4 shadow-xl space-y-4">
+                    <div class="grid grid-cols-3 gap-2 text-center border-b border-slate-700/55 pb-3">
+                        <div>
+                            <p class="text-[11px] text-slate-400">Solde recharge</p>
+                            <p id="rechargeBalance" class="text-sm font-bold text-amber-400 mt-1">XOF 0.00</p>
+                        </div>
+                        <div class="border-x border-slate-700/50 px-1">
+                            <p class="text-[11px] text-slate-400">Solde retrait</p>
+                            <p id="withdrawBalance" class="text-sm font-bold text-emerald-400 mt-1">XOF 0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-slate-400">Revenus</p>
+                            <p id="incomeBalance" class="text-sm font-bold text-sky-400 mt-1">XOF 0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 pt-1">
+                        <button onclick="openDepositMethodModal()" class="btn-orange text-white py-2 px-2 rounded-xl text-xs font-bold shadow-lg flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-wallet"></i><span>Recharger</span>
+                        </button>
+                        <button onclick="openWithdrawModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 px-2 rounded-xl text-xs font-semibold shadow flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-money-bill-transfer"></i><span>Retirer</span>
+                        </button>
+                        <button onclick="switchView('compte')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 px-2 rounded-xl text-xs font-semibold shadow flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-users"></i><span>Équipe</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grille d'accès rapide -->
+                <div class="grid grid-cols-5 gap-2 text-center">
+                    <button onclick="switchView('commandes')" class="gradient-card border border-slate-700/60 p-2.5 rounded-xl flex flex-col items-center space-y-1 hover:border-orange-500 transition">
+                        <div class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center"><i class="fa-solid fa-box text-sm"></i></div>
+                        <span class="text-[10px] text-slate-300 font-medium">Commandes</span>
+                    </button>
+                    <button onclick="switchView('investir')" class="gradient-card border border-slate-700/60 p-2.5 rounded-xl flex flex-col items-center space-y-1 hover:border-amber-500 transition">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center"><i class="fa-solid fa-gem text-sm"></i></div>
+                        <span class="text-[10px] text-slate-300 font-medium">VIP</span>
+                    </button>
+                    <button onclick="switchView('blog')" class="gradient-card border border-slate-700/60 p-2.5 rounded-xl flex flex-col items-center space-y-1 hover:border-sky-500 transition">
+                        <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center"><i class="fa-solid fa-book-open text-sm"></i></div>
+                        <span class="text-[10px] text-slate-300 font-medium">Blog</span>
+                    </button>
+                    <button onclick="switchView('taches')" class="gradient-card border border-slate-700/60 p-2.5 rounded-xl flex flex-col items-center space-y-1 hover:border-emerald-500 transition">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-file-lines text-sm"></i></div>
+                        <span class="text-[10px] text-slate-300 font-medium">Tâches</span>
+                    </button>
+                    <button onclick="openServiceModal()" class="gradient-card border border-slate-700/60 p-2.5 rounded-xl flex flex-col items-center space-y-1 hover:border-purple-500 transition">
+                        <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center"><i class="fa-solid fa-headset text-sm"></i></div>
+                        <span class="text-[10px] text-slate-300 font-medium">Service</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= VUE INVESTIR (20 PLANS VIP MIS À JOUR) ================= -->
+            <div id="view-investir" class="space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-car text-orange-400"></i>
+                        <span>Investissements VIP (20 Plans)</span>
+                    </h3>
+                </div>
+
+                <!-- Onglets de filtrage Court / Long Terme -->
+                <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700/60">
+                    <button id="tabCourtBtn" onclick="switchVipTab('court')" class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-orange-500 text-white shadow">⚡ Court Terme (10)</button>
+                    <button id="tabLongBtn" onclick="switchVipTab('long')" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white">⏳ Long Terme (10)</button>
+                </div>
+
+                <div id="depositWarningBanner" class="bg-amber-500/20 border border-amber-500/40 p-3 rounded-xl text-xs text-amber-300 hidden">
+                    ⚠️ <strong>Dépôt requis :</strong> Vous devez effectuer un dépôt d'au moins 2 500 FCFA pour pouvoir investir.
+                </div>
+
+                <!-- CONTENEUR LISTE DES PLANS VIP -->
+                <div id="vipPlansContainer" class="space-y-4">
+                    <!-- Généré dynamiquement en JS -->
+                </div>
+            </div>
+
+            <!-- ================= VUE TÂCHES ================= -->
+            <div id="view-taches" class="space-y-4 hidden">
+                <div class="gradient-card border border-slate-700/60 rounded-2xl p-4 text-center space-y-3 bg-gradient-to-br from-emerald-950/40 to-slate-900">
+                    <p class="text-xs text-slate-400">Commission totale gagnée</p>
+                    <h3 class="text-2xl font-extrabold text-emerald-400">+XOF 0</h3>
+                    <div class="grid grid-cols-3 gap-2 text-center pt-2 border-t border-slate-700/50">
+                        <div><p class="text-[10px] text-slate-400">Invités</p><p class="text-sm font-bold text-white">0</p></div>
+                        <div class="border-x border-slate-700/50"><p class="text-[10px] text-slate-400">Activés</p><p class="text-sm font-bold text-white">0</p></div>
+                        <div><p class="text-[10px] text-slate-400">Aujourd'hui</p><p class="text-sm font-bold text-white">0</p></div>
+                    </div>
+                </div>
+
+                <div class="gradient-card border border-slate-700/60 rounded-2xl p-3 flex items-center justify-between">
+                    <span class="text-xs text-slate-300 truncate max-w-[200px]" id="userInviteLink">https://autoinvest.vip/ref=msu</span>
+                    <button onclick="copyInviteLink()" class="btn-orange text-white px-3 py-1.5 rounded-xl text-xs font-bold">Copier</button>
+                </div>
+            </div>
+
+            <!-- ================= VUE BLOG ================= -->
+            <div id="view-blog" class="space-y-4 hidden">
+                <div class="gradient-card border border-slate-700/60 rounded-2xl p-4 space-y-3 bg-gradient-to-r from-orange-950/40 to-slate-900">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-orange-400 font-bold uppercase">// Forum</span>
+                            <h3 class="text-sm font-bold text-white">Nouvel utilisateur</h3>
+                        </div>
+                        <button onclick="alert('Publication ouverte')" class="bg-white text-slate-900 text-xs font-bold px-3 py-1.5 rounded-xl shadow">Publier</button>
+                    </div>
+                </div>
+                <div class="gradient-card border border-slate-700/60 rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-300">05****01</span>
+                        <span class="bg-amber-500/20 text-amber-400 text-xs font-bold px-2 py-0.5 rounded border border-amber-500/30">⭐ XOF 115.00</span>
+                    </div>
+                    <p class="text-xs text-slate-300">Le retrait est automatique 🙌</p>
+                </div>
+            </div>
+
+            <!-- ================= VUE COMPTE ================= -->
+            <div id="view-compte" class="space-y-4 hidden">
+                <div class="gradient-card border border-slate-700/60 rounded-2xl p-4 flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-sky-500/20 text-sky-400 rounded-2xl flex items-center justify-center text-xl border border-sky-500/30">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-bold text-white" id="profileEmailDisplay">New User</span>
+                            <span class="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded">VIP</span>
+                        </div>
+                        <p class="text-xs text-slate-400">ID: <span id="profileIdDisplay">26607</span></p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <button onclick="openModal('Mes cartes bancaires', 'Gérez vos cartes de paiement et numéros Wave/MTN.')" class="w-full gradient-card border border-slate-700/60 p-3 rounded-xl flex items-center justify-between text-xs text-slate-200 hover:border-orange-500 transition">
+                        <div class="flex items-center space-x-2"><i class="fa-solid fa-credit-card text-orange-400"></i><span>Mes cartes bancaires</span></div>
+                        <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                    </button>
+                    <button onclick="openModal('Mes bonus', 'Consultez tous vos versements de bonus de parrainage.')" class="w-full gradient-card border border-slate-700/60 p-3 rounded-xl flex items-center justify-between text-xs text-slate-200 hover:border-amber-500 transition">
+                        <div class="flex items-center space-x-2"><i class="fa-solid fa-gift text-amber-400"></i><span>Mes bonus</span></div>
+                        <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                    </button>
+                    <button onclick="switchView('commandes')" class="w-full gradient-card border border-slate-700/60 p-3 rounded-xl flex items-center justify-between text-xs text-slate-200 hover:border-sky-500 transition">
+                        <div class="flex items-center space-x-2"><i class="fa-solid fa-box text-sky-400"></i><span>Mes investissements / Commandes</span></div>
+                        <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= VUE COMMANDES / INVESTISSEMENTS ACTIFS ================= -->
+            <div id="view-commandes" class="space-y-4 hidden">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-box text-orange-400"></i>
+                        <span>Mes Commandes & Investissements</span>
+                    </h3>
+                    <button onclick="simulateDailyIncome()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow">
+                        Simuler gain journalier
+                    </button>
+                </div>
+                <div id="ordersListContainer" class="space-y-3">
+                    <p class="text-xs text-slate-500 italic text-center py-4">Aucun investissement en cours pour le moment.</p>
+                </div>
+            </div>
+
+            <!-- ================= VUE VIP ================= -->
+            <div id="view-vip" class="space-y-4 hidden">
+                <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-gem text-amber-400"></i>
+                    <span>Résumé des Niveaux VIP</span>
+                </h3>
+                <p class="text-xs text-slate-300">La plateforme propose 20 véhicules classés en 10 plans Court Terme et 10 plans Long Terme, offrant des gains quotidiens instantanés attractifs.</p>
+                <button onclick="switchView('investir')" class="w-full btn-orange text-white py-2 rounded-xl text-xs font-bold">Voir les 20 plans d'investissement</button>
+            </div>
+
+        </main>
+
+        <!-- BARRE DE NAVIGATION INFÉRIEURE -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-[#0b1120] border-t border-slate-800 py-2 px-4 z-40 max-w-md mx-auto">
+            <div class="flex justify-around items-center text-center">
+                <button onclick="switchView('accueil')" id="navBtn-accueil" class="flex flex-col items-center space-y-1 text-orange-400 group">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span class="text-[10px] font-medium">Accueil</span>
+                </button>
+                <button onclick="switchView('investir')" id="navBtn-investir" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-orange-400 group">
+                    <i class="fa-solid fa-car text-lg"></i>
+                    <span class="text-[10px] font-medium">Investir</span>
+                </button>
+                <button onclick="switchView('taches')" id="navBtn-taches" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-orange-400 group">
+                    <i class="fa-solid fa-file-lines text-lg"></i>
+                    <span class="text-[10px] font-medium">Tâches</span>
+                </button>
+                <button onclick="switchView('blog')" id="navBtn-blog" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-orange-400 group">
+                    <i class="fa-solid fa-book-open text-lg"></i>
+                    <span class="text-[10px] font-medium">Blog</span>
+                </button>
+                <button onclick="switchView('compte')" id="navBtn-compte" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-orange-400 group">
+                    <i class="fa-solid fa-user text-lg"></i>
+                    <span class="text-[10px] font-medium">Compte</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- MODALE DE DEPÔT -->
+    <div id="depositMethodModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-xs space-y-4 shadow-2xl text-center">
+            <h3 class="text-base font-bold text-white">Choisir le moyen de dépôt</h3>
+            <div class="space-y-2">
+                <button onclick="selectMethod('MTN Money')" class="w-full bg-amber-500/20 border border-amber-500/50 text-amber-300 py-3 rounded-xl text-xs font-bold">MTN Money</button>
+                <button onclick="selectMethod('Wave')" class="w-full bg-sky-500/20 border border-sky-500/50 text-sky-300 py-3 rounded-xl text-xs font-bold">Wave</button>
+            </div>
+            <button onclick="closeDepositMethodModal()" class="w-full bg-slate-700 text-white py-2 rounded-xl text-xs font-bold">Annuler</button>
+        </div>
+    </div>
+
+    <!-- MODALE MONTANT DEPOT -->
+    <div id="depositDetailsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-xs space-y-4 shadow-2xl text-center">
+            <h3 class="text-base font-bold text-white">Effectuer le transfert</h3>
             
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 50);
-
-            setTimeout(() => {
-                toast.classList.add('translate-y-2', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-        function renderApp() {
-            const db = getDB();
-            const app = document.getElementById('app');
-
-            if (!db.session) {
-                app.innerHTML = renderAuthView();
-                initAuthListeners();
-            } else if (db.session.role === 'admin') {
-                app.innerHTML = renderAdminDashboard(db);
-                initAdminListeners(db);
-            } else {
-                app.innerHTML = renderUserDashboard(db);
-                initUserListeners(db);
-            }
-        }
-
-        // VUE AUTHENTIFICATION (Connexion / Inscription)
-        let authMode = 'login'; // 'login' ou 'register'
-        function renderAuthView() {
-            return `
-            <div class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-dark-900 via-dark-800 to-amber-950/30">
-                <!-- Cercles lumineux d'arrière-plan -->
-                <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                <div class="w-full max-w-md bg-dark-800/90 backdrop-blur-xl border border-gray-700/60 rounded-3xl p-8 shadow-2xl relative z-10">
-                    <div class="text-center mb-8">
-                        <div class="w-16 h-16 bg-gradient-to-tr from-amber-500 to-yellow-300 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-amber-500/20 mb-4">
-                            <i class="fa-solid fa-car-side text-dark-900 text-3xl"></i>
-                        </div>
-                        <h1 class="text-2xl font-bold tracking-tight text-white">AutoInvest <span class="text-amber-400">Pro</span></h1>
-                        <p class="text-sm text-gray-400 mt-1">Investissez dans de vrais véhicules et encaissez vos gains</p>
+            <div class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-left space-y-1">
+                <p class="text-[10px] text-slate-400">Envoyer à (<span id="depositMethodTitle" class="text-orange-400 font-bold">Auto Invest</span>) :</p>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p id="depositPhoneNum" class="text-sm font-extrabold text-amber-400">0596180495</p>
+                        <p id="depositAccountName" class="text-xs text-slate-300">Nom : <strong>Auto Invest</strong></p>
                     </div>
-
-                    <!-- Sélecteur de mode -->
-                    <div class="flex bg-dark-900 p-1.5 rounded-xl mb-6 border border-gray-700/50">
-                        <button id="tab-login" onclick="switchAuthMode('login')" class="flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${authMode === 'login' ? 'bg-amber-500 text-dark-900 shadow-md' : 'text-gray-400 hover:text-white'}">Connexion</button>
-                        <button id="tab-register" onclick="switchAuthMode('register')" class="flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${authMode === 'register' ? 'bg-amber-500 text-dark-900 shadow-md' : 'text-gray-400 hover:text-white'}">Inscription</button>
-                    </div>
-
-                    <form id="auth-form" class="space-y-4">
-                        ${authMode === 'register' ? `
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Nom complet</label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-user"></i></span>
-                                    <input type="text" id="reg-name" required placeholder="Ex: Jean Kouassi" class="w-full pl-10 pr-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 transition-colors text-sm">
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Adresse Email</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-envelope"></i></span>
-                                <input type="email" id="auth-email" required placeholder="votre@email.com" class="w-full pl-10 pr-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 transition-colors text-sm">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Mot de passe</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-lock"></i></span>
-                                <input type="password" id="auth-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 transition-colors text-sm">
-                            </div>
-                        </div>
-
-                        ${authMode === 'login' ? `
-                            <div class="flex items-center justify-between text-xs text-gray-400 pt-1">
-                                <span>Admin test : <strong class="text-amber-400">msourabi610@gmail.com</strong> / <strong class="text-amber-400">00000</strong></span>
-                            </div>
-                        ` : ''}
-
-                        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-dark-900 font-bold rounded-xl shadow-lg shadow-amber-500/20 transition-all transform active:scale-95 text-sm uppercase tracking-wider">
-                            ${authMode === 'login' ? 'Se connecter' : 'Créer mon compte'}
-                        </button>
-                    </form>
+                    <button onclick="copyDepositInfo()" class="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded-lg text-xs" title="Copier le numéro">
+                        <i class="fa-solid fa-copy text-amber-400"></i>
+                    </button>
                 </div>
-            </div>`;
-        }
+            </div>
 
-        function switchAuthMode(mode) {
-            authMode = mode;
-            renderApp();
-        }
+            <input type="number" id="depositAmountInput" placeholder="Montant (Min 2500 FCFA)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500">
+            <div class="flex space-x-2">
+                <button onclick="submitDepositRequest()" class="flex-1 btn-orange text-white py-2 rounded-xl text-xs font-bold">Valider</button>
+                <button onclick="closeDepositDetailsModal()" class="flex-1 bg-slate-700 text-white py-2 rounded-xl text-xs font-bold">Retour</button>
+            </div>
+        </div>
+    </div>
 
-        function initAuthListeners() {
-            const form = document.getElementById('auth-form');
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const email = document.getElementById('auth-email').value.trim();
-                const password = document.getElementById('auth-password').value.trim();
-                const db = getDB();
-
-                if (authMode === 'login') {
-                    const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-                    if (user) {
-                        db.session = user;
-                        saveDB(db);
-                        showToast(`Bienvenue ${user.name} !`, 'success');
-                        renderApp();
-                    } else {
-                        showToast('Email ou mot de passe incorrect.', 'error');
-                    }
-                } else {
-                    const name = document.getElementById('reg-name').value.trim();
-                    if (db.users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-                        showToast('Cet email est déjà utilisé.', 'error');
-                        return;
-                    }
-                    const newUser = {
-                        id: 'usr_' + Date.now(),
-                        name,
-                        email,
-                        password,
-                        role: 'user',
-                        balance: 0,
-                        totalInvested: 0,
-                        totalEarned: 0,
-                        createdAt: new Date().toISOString()
-                    };
-                    db.users.push(newUser);
-                    db.session = newUser;
-                    saveDB(db);
-                    showToast('Compte créé avec succès ! Bienvenue sur AutoInvest.', 'success');
-                    renderApp();
-                }
-            });
-        }
-        let activeAdminTab = 'deposits'; // 'deposits', 'withdrawals', 'users', 'vehicles'
-
-        function renderAdminDashboard(db) {
-            const pendingDeposits = db.deposits.filter(d => d.status === 'pending');
-            const pendingWithdrawals = db.withdrawals.filter(w => w.status === 'pending');
+    <!-- MODALE RETRAIT -->
+    <div id="withdrawModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-center">
+            <h3 class="text-base font-bold text-white">Effectuer un retrait</h3>
+            <p class="text-xs text-slate-400">Retrait minimum : <strong class="text-amber-400">1 100 FCFA</strong></p>
             
-            return `
-            <div class="flex-1 flex flex-col md:flex-row bg-dark-900">
-                <!-- Sidebar Admin -->
-                <aside class="w-full md:w-64 bg-dark-800 border-r border-gray-800 flex flex-col">
-                    <div class="p-6 border-b border-gray-800 flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-xl flex items-center justify-center font-bold text-dark-900">
-                            <i class="fa-solid fa-shield-halved"></i>
-                        </div>
-                        <div>
-                            <h2 class="font-bold text-white text-sm">Panneau Admin</h2>
-                            <p class="text-xs text-rose-400">Mode Administrateur</p>
-                        </div>
-                    </div>
-
-                    <nav class="p-4 space-y-1.5 flex-1">
-                        <button onclick="setAdminTab('deposits')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeAdminTab === 'deposits' ? 'bg-amber-500 text-dark-900 font-semibold shadow-lg shadow-amber-500/10' : 'text-gray-400 hover:bg-dark-700 hover:text-white'}">
-                            <span class="flex items-center space-x-3"><i class="fa-solid fa-money-bill-transfer w-5"></i><span>Dépôts à valider</span></span>
-                            ${pendingDeposits.length > 0 ? `<span class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">${pendingDeposits.length}</span>` : ''}
-                        </button>
-                        <button onclick="setAdminTab('withdrawals')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeAdminTab === 'withdrawals' ? 'bg-amber-500 text-dark-900 font-semibold shadow-lg shadow-amber-500/10' : 'text-gray-400 hover:bg-dark-700 hover:text-white'}">
-                            <span class="flex items-center space-x-3"><i class="fa-solid fa-wallet w-5"></i><span>Retraits</span></span>
-                            ${pendingWithdrawals.length > 0 ? `<span class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">${pendingWithdrawals.length}</span>` : ''}
-                        </button>
-                        <button onclick="setAdminTab('users')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeAdminTab === 'users' ? 'bg-amber-500 text-dark-900 font-semibold shadow-lg' : 'text-gray-400 hover:bg-dark-700 hover:text-white'}">
-                            <i class="fa-solid fa-users w-5"></i><span>Utilisateurs (${db.users.length})</span>
-                        </button>
-                        <button onclick="setAdminTab('vehicles')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeAdminTab === 'vehicles' ? 'bg-amber-500 text-dark-900 font-semibold shadow-lg' : 'text-gray-400 hover:bg-dark-700 hover:text-white'}">
-                            <i class="fa-solid fa-car w-5"></i><span>Catalogue Flotte</span>
-                        </button>
-                    </nav>
-
-                    <div class="p-4 border-t border-gray-800">
-                        <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl text-sm font-medium transition-all">
-                            <i class="fa-solid fa-right-from-bracket"></i><span>Déconnexion</span>
-                        </button>
-                    </div>
-                </aside>
-
-                <!-- Contenu Principal Admin -->
-                <main class="flex-1 p-6 md:p-8 overflow-y-auto">
-                    <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-800 mb-6 gap-4">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white capitalize">${activeAdminTab === 'deposits' ? 'Gestion des Dépôts en attente' : activeAdminTab === 'withdrawals' ? 'Demandes de Retrait' : activeAdminTab === 'users' ? 'Liste des Utilisateurs Inscrits' : 'Gestion de la Flotte de Véhicules'}</h1>
-                            <p class="text-sm text-gray-400">Validez instantanément les transactions pour créditer les comptes réels.</p>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="bg-dark-800 border border-gray-700 px-4 py-2 rounded-xl text-xs flex items-center space-x-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span class="text-gray-300">Admin: <strong>msourabi610@gmail.com</strong></span>
-                            </div>
-                        </div>
-                    </header>
-
-                    ${activeAdminTab === 'deposits' ? renderAdminDeposits(db) :
-                      activeAdminTab === 'withdrawals' ? renderAdminWithdrawals(db) :
-                      activeAdminTab === 'users' ? renderAdminUsers(db) : renderAdminVehicles(db)}
-                </main>
-            </div>`;
-        }
-
-        function setAdminTab(tab) {
-            activeAdminTab = tab;
-            renderApp();
-        }
-
-        function renderAdminDeposits(db) {
-            const deposits = db.deposits;
-            if (deposits.length === 0) {
-                return `<div class="bg-dark-800/50 border border-gray-800 rounded-2xl p-12 text-center text-gray-500">Aucun dépôt enregistré pour le moment.</div>`;
-            }
-
-            return `
-            <div class="bg-dark-800 border border-gray-700/60 rounded-2xl overflow-hidden shadow-xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-dark-900/60 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400">
-                                <th class="p-4">Utilisateur</th>
-                                <th class="p-4">Montant</th>
-                                <th class="p-4">Méthode / Ref</th>
-                                <th class="p-4">Date</th>
-                                <th class="p-4">Statut</th>
-                                <th class="p-4 text-right">Actions instantanées</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-800 text-sm">
-                            ${deposits.map(d => `
-                                <tr class="hover:bg-dark-700/40 transition-colors">
-                                    <td class="p-4 font-medium text-white">${d.userName}</td>
-                                    <td class="p-4 font-bold text-amber-400">${d.amount.toLocaleString()} FCFA</td>
-                                    <td class="p-4 text-gray-300">
-                                        <div class="font-medium">${d.method}</div>
-                                        <div class="text-xs text-gray-500 font-mono">${d.reference}</div>
-                                    </td>
-                                    <td class="p-4 text-gray-400 text-xs">${new Date(d.date).toLocaleString()}</td>
-                                    <td class="p-4">
-                                        ${d.status === 'pending' ? '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs rounded-full font-medium border border-amber-500/20">En attente</span>' :
-                                          d.status === 'approved' ? '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded-full font-medium border border-emerald-500/20">Validé</span>' :
-                                          '<span class="px-2.5 py-1 bg-rose-500/10 text-rose-400 text-xs rounded-full font-medium border border-rose-500/20">Refusé</span>'}
-                                    </td>
-                                    <td class="p-4 text-right space-x-2">
-                                        ${d.status === 'pending' ? `
-                                            <button onclick="validateDeposit('${d.id}', true)" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow transition-all">
-                                                <i class="fa-solid fa-check mr-1"></i> Valider
-                                            </button>
-                                            <button onclick="validateDeposit('${d.id}', false)" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold shadow transition-all">
-                                                <i class="fa-solid fa-xmark mr-1"></i> Rejeter
-                                            </button>
-                                        ` : '<span class="text-xs text-gray-500 italic">Traité</span>'}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+            <!-- Simulateur d'heure pour tester le mode nuit/jour -->
+            <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 text-left space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-300">Simulateur horaire :</span>
+                    <span id="currentTimeDisplay" class="font-bold text-orange-400"></span>
                 </div>
-            </div>`;
-        }
-
-        function validateDeposit(depositId, isApproved) {
-            const db = getDB();
-            const dep = db.deposits.find(d => d.id === depositId);
-            if (!dep || dep.status !== 'pending') return;
-
-            dep.status = isApproved ? 'approved' : 'rejected';
-
-            if (isApproved) {
-                const user = db.users.find(u => u.id === dep.userId);
-                if (user) {
-                    user.balance += dep.amount;
-                    showToast(`Dépôt de ${dep.amount.toLocaleString()} FCFA validé ! Solde de ${user.name} crédité.`, 'success');
-                }
-            } else {
-                showToast('Dépôt rejeté.', 'info');
-            }
-
-            saveDB(db);
-            renderApp();
-        }
-
-        function renderAdminWithdrawals(db) {
-            const withdrawals = db.withdrawals;
-            if (withdrawals.length === 0) {
-                return `<div class="bg-dark-800/50 border border-gray-800 rounded-2xl p-12 text-center text-gray-500">Aucune demande de retrait.</div>`;
-            }
-
-            return `
-            <div class="bg-dark-800 border border-gray-700/60 rounded-2xl overflow-hidden shadow-xl">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-dark-900/60 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400">
-                            <th class="p-4">Utilisateur</th>
-                            <th class="p-4">Montant</th>
-                            <th class="p-4">Moyen / Téléphone</th>
-                            <th class="p-4">Date</th>
-                            <th class="p-4">Statut</th>
-                            <th class="p-4 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-800 text-sm">
-                        ${withdrawals.map(w => `
-                            <tr class="hover:bg-dark-700/40 transition-colors">
-                                <td class="p-4 font-medium text-white">${w.userName}</td>
-                                <td class="p-4 font-bold text-rose-400">-${w.amount.toLocaleString()} FCFA</td>
-                                <td class="p-4 text-gray-300">${w.method} (${w.phone})</td>
-                                <td class="p-4 text-gray-400 text-xs">${new Date(w.date).toLocaleString()}</td>
-                                <td class="p-4">
-                                    ${w.status === 'pending' ? '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs rounded-full font-medium border border-amber-500/20">En attente</span>' :
-                                      w.status === 'approved' ? '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded-full font-medium border border-emerald-500/20">Payé</span>' :
-                                      '<span class="px-2.5 py-1 bg-rose-500/10 text-rose-400 text-xs rounded-full font-medium border border-rose-500/20">Refusé</span>'}
-                                </td>
-                                <td class="p-4 text-right space-x-2">
-                                    ${w.status === 'pending' ? `
-                                        <button onclick="processWithdrawal('${w.id}', true)" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow">Payer</button>
-                                        <button onclick="processWithdrawal('${w.id}', false)" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold shadow">Rejeter</button>
-                                    ` : '<span class="text-xs text-gray-500 italic">Traité</span>'}
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>`;
-        }
-
-        function processWithdrawal(id, approved) {
-            const db = getDB();
-            const w = db.withdrawals.find(item => item.id === id);
-            if (!w || w.status !== 'pending') return;
-
-            w.status = approved ? 'approved' : 'rejected';
-            if (!approved) {
-                const user = db.users.find(u => u.id === w.userId);
-                if (user) user.balance += w.amount;
-                showToast('Retrait rejeté et fonds remboursés au client.', 'info');
-            } else {
-                showToast('Retrait marqué comme payé avec succès.', 'success');
-            }
-            saveDB(db);
-            renderApp();
-        }
-
-        function renderAdminUsers(db) {
-            return `
-            <div class="bg-dark-800 border border-gray-700/60 rounded-2xl overflow-hidden shadow-xl">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-dark-900/60 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400">
-                            <th class="p-4">Nom</th>
-                            <th class="p-4">Email</th>
-                            <th class="p-4">Rôle</th>
-                            <th class="p-4">Solde Actuel</th>
-                            <th class="p-4">Inscrit le</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-800 text-sm">
-                        ${db.users.map(u => `
-                            <tr class="hover:bg-dark-700/40">
-                                <td class="p-4 font-medium text-white">${u.name}</td>
-                                <td class="p-4 text-gray-300">${u.email}</td>
-                                <td class="p-4"><span class="px-2 py-0.5 rounded text-xs font-bold ${u.role === 'admin' ? 'bg-rose-500/20 text-rose-400' : 'bg-blue-500/20 text-blue-400'}">${u.role}</span></td>
-                                <td class="p-4 font-bold text-amber-400">${u.balance.toLocaleString()} FCFA</td>
-                                <td class="p-4 text-gray-400 text-xs">${new Date(u.createdAt).toLocaleDateString()}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>`;
-        }
-
-        function renderAdminVehicles(db) {
-            return `
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                ${db.vehicles.map(v => `
-                    <div class="bg-dark-800 border border-gray-700/60 rounded-2xl overflow-hidden shadow-xl flex flex-col">
-                        <img src="${v.image}" alt="${v.name}" class="h-40 w-full object-cover">
-                        <div class="p-5 flex-1 flex flex-col">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-bold text-white">${v.name}</h3>
-                                <span class="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-full border border-amber-500/20">${v.type}</span>
-                            </div>
-                            <div class="space-y-1 text-sm mb-4">
-                                <p class="text-gray-400">Prix : <strong class="text-white">${v.price.toLocaleString()} FCFA</strong></p>
-                                <p class="text-gray-400">Rendement : <strong class="text-emerald-400">+${v.dailyReturn.toLocaleString()} FCFA / jour</strong></p>
-                                <p class="text-gray-400">Durée : <strong class="text-white">${v.durationDays} jours</strong></p>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>`;
-        }
-
-        function initAdminListeners(db) {}
-        let activeUserTab = 'fleet'; // 'fleet', 'my_investments', 'wallet', 'history'
-
-        function renderUserDashboard(db) {
-            const user = db.users.find(u => u.id === db.session.id) || db.session;
-            const myInvestments = db.investments.filter(i => i.userId === user.id);
-            const myTransactions = [...db.deposits.filter(d => d.userId === user.id), ...db.withdrawals.filter(w => w.userId === user.id)];
-
-            return `
-            <div class="flex-1 flex flex-col bg-dark-900">
-                <!-- Navbar Utilisateur -->
-                <header class="bg-dark-800 border-b border-gray-800 sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-yellow-300 rounded-xl flex items-center justify-center font-bold text-dark-900 shadow-lg shadow-amber-500/20">
-                            <i class="fa-solid fa-car-side"></i>
-                        </div>
-                        <div>
-                            <span class="font-bold text-white text-base">AutoInvest <span class="text-amber-400">Pro</span></span>
-                            <span class="block text-xs text-emerald-400 font-medium"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Compte Réel Actif</span>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center space-x-4">
-                        <div class="bg-dark-900/80 border border-gray-700/80 px-4 py-2 rounded-xl flex items-center space-x-3">
-                            <i class="fa-solid fa-wallet text-amber-400"></i>
-                            <div>
-                                <div class="text-[10px] uppercase text-gray-400 font-semibold">Solde Principal</div>
-                                <div class="text-sm font-bold text-white">${user.balance.toLocaleString()} FCFA</div>
-                            </div>
-                        </div>
-                        <button onclick="logout()" class="p-2.5 bg-dark-700 hover:bg-rose-600 text-gray-300 hover:text-white rounded-xl transition-all" title="Déconnexion">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </div>
-                </header>
-
-                <!-- Navigation Tabs Utilisateur -->
-                <div class="bg-dark-800/60 border-b border-gray-800 px-6 flex space-x-2 overflow-x-auto">
-                    <button onclick="setUserTab('fleet')" class="py-3 px-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${activeUserTab === 'fleet' ? 'border-amber-500 text-amber-400 font-semibold' : 'border-transparent text-gray-400 hover:text-white'}">
-                        <i class="fa-solid fa-car mr-2"></i> Flotte Automobile
-                    </button>
-                    <button onclick="setUserTab('my_investments')" class="py-3 px-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${activeUserTab === 'my_investments' ? 'border-amber-500 text-amber-400 font-semibold' : 'border-transparent text-gray-400 hover:text-white'}">
-                        <i class="fa-solid fa-chart-line mr-2"></i> Mes Investissements (${myInvestments.length})
-                    </button>
-                    <button onclick="setUserTab('wallet')" class="py-3 px-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${activeUserTab === 'wallet' ? 'border-amber-500 text-amber-400 font-semibold' : 'border-transparent text-gray-400 hover:text-white'}">
-                        <i class="fa-solid fa-money-bill-transfer mr-2"></i> Dépôt & Retrait
-                    </button>
-                    <button onclick="setUserTab('history')" class="py-3 px-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${activeUserTab === 'history' ? 'border-amber-500 text-amber-400 font-semibold' : 'border-transparent text-gray-400 hover:text-white'}">
-                        <i class="fa-solid fa-clock-rotate-left mr-2"></i> Historique
-                    </button>
-                </div>
-
-                <!-- Contenu dynamique utilisateur -->
-                <main class="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full">
-                    ${activeUserTab === 'fleet' ? renderUserFleet(db, user) :
-                      activeUserTab === 'my_investments' ? renderUserInvestments(myInvestments) :
-                      activeUserTab === 'wallet' ? renderUserWallet(user) : renderUserHistory(myTransactions)}
-                </main>
-            </div>`;
-        }
-
-        function setUserTab(tab) {
-            activeUserTab = tab;
-            renderApp();
-        }
-
-        function renderUserFleet(db, user) {
-            return `
-            <div class="mb-8 bg-gradient-to-r from-amber-500/10 via-dark-800 to-dark-800 border border-amber-500/20 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-                <div>
-                    <h2 class="text-xl font-bold text-white mb-2">Générez des revenus journaliers passifs</h2>
-                    <p class="text-sm text-gray-300 max-w-xl">Chaque véhicule est exploité sur le terrain (VTC, livraison, taxis). Vos gains quotidiens sont versés automatiquement sur votre compte.</p>
-                </div>
-                <button onclick="setUserTab('wallet')" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-dark-900 font-bold rounded-xl shadow-lg shadow-amber-500/20 transition-all text-sm whitespace-nowrap">
-                    <i class="fa-solid fa-plus-circle mr-2"></i> Faire un dépôt (FCFA)
+                <button onclick="toggleNightModeSimulation()" id="nightModeToggleBtn" class="w-full text-xs font-bold py-1.5 rounded-lg border transition">
+                    Basculer Mode Nuit / Jour
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                ${db.vehicles.map(v => `
-                    <div class="bg-dark-800 border border-gray-700/60 rounded-2xl overflow-hidden shadow-xl flex flex-col hover:border-amber-500/50 transition-all group">
-                        <div class="relative overflow-hidden h-48">
-                            <img src="${v.image}" alt="${v.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            <span class="absolute top-3 right-3 bg-dark-900/80 backdrop-blur-md text-amber-400 text-xs font-bold px-3 py-1 rounded-full border border-amber-500/30">${v.type}</span>
-                        </div>
-                        <div class="p-6 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h3 class="font-bold text-white text-lg mb-2">${v.name}</h3>
-                                <div class="bg-dark-900/60 rounded-xl p-3.5 border border-gray-700/50 mb-4 space-y-2">
-                                    <div class="flex justify-between items-center text-sm">
-                                        <span class="text-gray-400">Prix d'acquisition :</span>
-                                        <span class="font-bold text-white">${v.price.toLocaleString()} FCFA</span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-sm">
-                                        <span class="text-gray-400">Gain journalier :</span>
-                                        <span class="font-bold text-emerald-400">+${v.dailyReturn.toLocaleString()} FCFA</span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-sm">
-                                        <span class="text-gray-400">Durée contrat :</span>
-                                        <span class="font-bold text-amber-400">${v.durationDays} Jours</span>
-                                    </div>
-                                </div>
-                                <ul class="space-y-1.5 text-xs text-gray-300 mb-6">
-                                    ${v.features.map(f => `<li class="flex items-center"><i class="fa-solid fa-check text-emerald-400 mr-2"></i>${f}</li>`).join('')}
-                                </ul>
-                            </div>
-                            <button onclick="investInVehicle('${v.id}')" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-dark-900 font-bold rounded-xl shadow-lg shadow-amber-500/10 transition-all text-sm uppercase tracking-wider">
-                                Investir (${v.price.toLocaleString()} FCFA)
-                            </button>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>`;
+            <input type="number" id="withdrawAmountInput" placeholder="Montant en FCFA (Min 1100)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500">
+            
+            <div class="flex space-x-2">
+                <button onclick="submitWithdrawRequest()" class="flex-1 btn-orange text-white py-2 rounded-xl text-xs font-bold">Retirer</button>
+                <button onclick="closeWithdrawModal()" class="flex-1 bg-slate-700 text-white py-2 rounded-xl text-xs font-bold">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE GÉNÉRALE -->
+    <div id="actionModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-xs text-center space-y-4 shadow-2xl">
+            <h3 id="modalTitle" class="text-base font-bold text-white"></h3>
+            <p id="modalText" class="text-xs text-slate-300"></p>
+            <button onclick="closeModal()" class="w-full bg-slate-700 text-white py-2 rounded-xl text-xs font-bold">Fermer</button>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_EMAIL = "msourabi610@gmail.com";
+        const ADMIN_PASS = "12345";
+        let currentUser = null;
+        let balances = { recharge: 0, withdraw: 0, income: 0 };
+        let activeOrders = [];
+        let hasDeposited = false;
+        let selectedMethodName = "";
+        let simulatedHour = 14;
+        let currentVipTab = 'court';
+
+        // 10 PLANS COURD TERME (Ajustés : ex. 3000 FCFA -> 900 FCFA/jour)
+        const courtTermPlans = [
+            { id: 1, name: "Citadine Eco", price: 2500, daily: 700, days: 15, img: "https://images.unsplash.com/photo-1541899481282-d53bffe3c351?w=600&auto=format&fit=crop&q=80" },
+            { id: 2, name: "Berline Urbaine", price: 3000, daily: 900, days: 15, img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&auto=format&fit=crop&q=80" },
+            { id: 3, name: "Coupé Sport S1", price: 6000, daily: 1800, days: 20, img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80" },
+            { id: 4, name: "SUV Compact Pro", price: 10000, daily: 3100, days: 20, img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&auto=format&fit=crop&q=80" },
+            { id: 5, name: "Roadster Turbo", price: 15000, daily: 4800, days: 25, img: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=600&auto=format&fit=crop&q=80" },
+            { id: 6, name: "Berline Exécutif", price: 25000, daily: 8200, days: 25, img: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&auto=format&fit=crop&q=80" },
+            { id: 7, name: "Supercar GT-R", price: 40000, daily: 13500, days: 30, img: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=600&auto=format&fit=crop&q=80" },
+            { id: 8, name: "Hypercar V12", price: 65000, daily: 22500, days: 30, img: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=600&auto=format&fit=crop&q=80" },
+            { id: 9, name: "Bolide de Course", price: 95000, daily: 33500, days: 30, img: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&auto=format&fit=crop&q=80" },
+            { id: 10, name: "Concept Car Ultimate", price: 130000, daily: 47000, days: 30, img: "https://images.unsplash.com/photo-1555353540-64580b51c258?w=600&auto=format&fit=crop&q=80" }
+        ];
+
+        // 10 PLANS LONG TERME (Ajustés pour de fortes rentabilités progressives)
+        const longTermPlans = [
+            { id: 11, name: "Électrique City Long", price: 8000, daily: 650, days: 90, img: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&auto=format&fit=crop&q=80" },
+            { id: 12, name: "Berline Confort VIP", price: 15000, daily: 1300, days: 90, img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&auto=format&fit=crop&q=80" },
+            { id: 13, name: "SUV Famille Gold", price: 30000, daily: 2800, days: 120, img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&auto=format&fit=crop&q=80" },
+            { id: 14, name: "Berline Prestige L", price: 55000, daily: 5300, days: 120, img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80" },
+            { id: 15, name: "Limousine Présidentielle", price: 90000, daily: 9100, days: 150, img: "https://images.unsplash.com/photo-1541899481282-d53bffe3c351?w=600&auto=format&fit=crop&q=80" },
+            { id: 16, name: "Sportive Endurance", price: 150000, daily: 15800, days: 150, img: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=600&auto=format&fit=crop&q=80" },
+            { id: 17, name: "Supercar Collector", price: 220000, daily: 24000, days: 180, img: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=600&auto=format&fit=crop&q=80" },
+            { id: 18, name: "Hypercar Legend", price: 320000, daily: 36000, days: 180, img: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&auto=format&fit=crop&q=80" },
+            { id: 19, name: "Prototype 24H", price: 450000, daily: 52000, days: 200, img: "https://images.unsplash.com/photo-1555353540-64580b51c258?w=600&auto=format&fit=crop&q=80" },
+            { id: 20, name: "Flotte Royale Infinity", price: 800000, daily: 98000, days: 365, img: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=600&auto=format&fit=crop&q=80" }
+        ];
+
+        function switchAuthTab(tab) {
+            if(tab === 'login') {
+                document.getElementById('tabLoginBtn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-orange-500 text-white shadow";
+                document.getElementById('tabRegisterBtn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white";
+                document.getElementById('loginFormContainer').classList.remove('hidden');
+                document.getElementById('registerFormContainer').classList.add('hidden');
+            } else {
+                document.getElementById('tabRegisterBtn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-orange-500 text-white shadow";
+                document.getElementById('tabLoginBtn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white";
+                document.getElementById('registerFormContainer').classList.remove('hidden');
+                document.getElementById('loginFormContainer').classList.add('hidden');
+            }
         }
 
-        function investInVehicle(vehicleId) {
-            const db = getDB();
-            const user = db.users.find(u => u.id === db.session.id);
-            const vehicle = db.vehicles.find(v => v.id === vehicleId);
+        function switchVipTab(tab) {
+            currentVipTab = tab;
+            if(tab === 'court') {
+                document.getElementById('tabCourtBtn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-orange-500 text-white shadow";
+                document.getElementById('tabLongBtn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white";
+            } else {
+                document.getElementById('tabLongBtn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-orange-500 text-white shadow";
+                document.getElementById('tabCourtBtn').className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white";
+            }
+            renderVipPlans();
+        }
 
-            if (!user || !vehicle) return;
+        function renderVipPlans() {
+            let container = document.getElementById('vipPlansContainer');
+            let plans = (currentVipTab === 'court') ? courtTermPlans : longTermPlans;
+            let html = "";
+            
+            plans.forEach(p => {
+                let totalEarnings = p.daily * p.days;
+                html += `
+                <div class="gradient-card border border-slate-700/60 rounded-2xl overflow-hidden shadow-lg space-y-3">
+                    <img src="${p.img}" alt="${p.name}" class="w-full h-32 object-cover">
+                    <div class="p-4 pt-0 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-500/30">${currentVipTab === 'court' ? 'Court Terme' : 'Long Terme'} - ${p.days} Jours</span>
+                                <h4 class="text-base font-bold text-white mt-1">${p.name}</h4>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-slate-400">Quotidien (Instantané)</p>
+                                <p class="text-sm font-extrabold text-emerald-400">+XOF ${p.daily.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-300 border-t border-slate-700/60 pt-2">
+                            <span>Prix : <strong class="text-white">${p.price.toLocaleString()} XOF</strong></span>
+                            <span>Total : <strong class="text-amber-400">${totalEarnings.toLocaleString()} XOF</strong></span>
+                        </div>
+                        <button onclick="investInPlan(${p.price}, ${p.daily}, '${p.name}')" class="w-full btn-orange text-white py-2 rounded-xl text-xs font-bold shadow transition hover:opacity-95">
+                            Investir dans ce plan
+                        </button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
 
-            if (user.balance < vehicle.price) {
-                showToast(`Solde insuffisant (${user.balance.toLocaleString()} FCFA). Veuillez effectuer un dépôt.`, 'error');
-                setUserTab('wallet');
+        function switchView(viewName) {
+            const views = ['accueil', 'investir', 'taches', 'blog', 'compte', 'commandes', 'vip'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if(el) el.classList.add('hidden');
+            });
+
+            const target = document.getElementById(`view-${viewName}`);
+            if(target) target.classList.remove('hidden');
+
+            const navTabs = ['accueil', 'investir', 'taches', 'blog', 'compte'];
+            navTabs.forEach(t => {
+                const btn = document.getElementById(`navBtn-${t}`);
+                if(btn) {
+                    if(t === viewName) {
+                        btn.className = "flex flex-col items-center space-y-1 text-orange-400 group";
+                    } else {
+                        btn.className = "flex flex-col items-center space-y-1 text-slate-400 hover:text-orange-400 group";
+                    }
+                }
+            });
+
+            if(viewName === 'investir') renderVipPlans();
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if(email === ADMIN_EMAIL && password === ADMIN_PASS) {
+                currentUser = ADMIN_EMAIL;
+                initSession();
                 return;
             }
 
-            user.balance -= vehicle.price;
-            user.totalInvested = (user.totalInvested || 0) + vehicle.price;
-
-            const newInvestment = {
-                id: 'inv_' + Date.now(),
-                userId: user.id,
-                userName: user.name,
-                vehicleId: vehicle.id,
-                vehicleName: vehicle.name,
-                amount: vehicle.price,
-                dailyReturn: vehicle.dailyReturn,
-                daysRemaining: vehicle.durationDays,
-                totalCollected: 0,
-                startDate: new Date().toISOString(),
-                status: 'active'
-            };
-
-            db.investments.push(newInvestment);
-            db.session = user;
-            saveDB(db);
-
-            showToast(`Félicitations ! Vous possédez désormais un(e) ${vehicle.name}.`, 'success');
-            setUserTab('my_investments');
-        }
-
-        function renderUserInvestments(investments) {
-            if (investments.length === 0) {
-                return `
-                <div class="bg-dark-800/50 border border-gray-700/60 rounded-3xl p-12 text-center">
-                    <div class="w-16 h-16 bg-dark-700 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500 text-2xl">
-                        <i class="fa-solid fa-car"></i>
-                    </div>
-                    <h3 class="font-bold text-white text-lg mb-1">Aucun investissement actif</h3>
-                    <p class="text-sm text-gray-400 mb-6">Choisissez votre premier véhicule dans la flotte pour commencer à générer des gains quotidiens.</p>
-                    <button onclick="setUserTab('fleet')" class="px-6 py-3 bg-amber-500 text-dark-900 font-bold rounded-xl text-sm">Voir la flotte</button>
-                </div>`;
+            let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
+            if(!users[email] || users[email].password !== password) {
+                alert("Identifiants incorrects.");
+                return;
             }
 
-            return `
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                ${investments.map(inv => `
-                    <div class="bg-dark-800 border border-gray-700/60 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="font-bold text-white text-lg">${inv.vehicleName}</h3>
-                                    <p class="text-xs text-gray-400">Investi le ${new Date(inv.startDate).toLocaleDateString()}</p>
-                                </div>
-                                <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold">Actif & Rentable</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4 bg-dark-900/60 p-4 rounded-xl border border-gray-700/50 mb-4">
-                                <div>
-                                    <span class="text-xs text-gray-400 block mb-1">Gain journalier</span>
-                                    <span class="text-base font-bold text-emerald-400">+${inv.dailyReturn.toLocaleString()} FCFA</span>
-                                </div>
-                                <div>
-                                    <span class="text-xs text-gray-400 block mb-1">Jours restants</span>
-                                    <span class="text-base font-bold text-amber-400">${inv.daysRemaining} Jours</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-700/60">
-                            <span>Total généré : <strong class="text-white">${inv.totalCollected.toLocaleString()} FCFA</strong></span>
-                            <span class="text-amber-400 font-medium"><i class="fa-solid fa-bolt mr-1"></i> Génération automatique 24h/24</span>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>`;
+            currentUser = email;
+            initSession();
         }
 
-        function renderUserWallet(user) {
-            return `
-            <div class="max-w-2xl mx-auto space-y-8">
-                <!-- Solde Principal Carte -->
-                <div class="bg-gradient-to-r from-amber-500 to-yellow-500 rounded-3xl p-8 text-dark-900 shadow-xl relative overflow-hidden">
-                    <div class="relative z-10">
-                        <span class="text-xs font-bold uppercase tracking-wider opacity-80">Solde Réel Disponible</span>
-                        <div class="text-3xl md:text-4xl font-extrabold mt-1 mb-4">${user.balance.toLocaleString()} FCFA</div>
-                        <p class="text-xs font-medium opacity-90">Les dépôts validés par l'administrateur s'affichent instantanément ici.</p>
-                    </div>
-                    <div class="absolute -right-6 -bottom-6 text-dark-900/10 text-9xl">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                </div>
+        function handleRegister(event) {
+            event.preventDefault();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value.trim();
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Formulaire de Dépôt -->
-                    <div class="bg-dark-800 border border-gray-700/60 rounded-3xl p-6 shadow-xl">
-                        <h3 class="font-bold text-white text-base mb-4 flex items-center">
-                            <i class="fa-solid fa-circle-arrow-down text-emerald-400 mr-2"></i> Faire un Dépôt (FCFA)
-                        </h3>
-                        <form id="deposit-form" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1.5">Montant (FCFA)</label>
-                                <input type="number" id="dep-amount" min="1000" required placeholder="Ex: 50000" class="w-full px-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1.5">Méthode de paiement</label>
-                                <select id="dep-method" class="w-full px-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-amber-500 text-sm">
-                                    <option value="Orange Money CI">Orange Money CI</option>
-                                    <option value="MTN Mobile Money">MTN Mobile Money</option>
-                                    <option value="Wave CI">Wave CI</option>
-                                    <option value="Moov Money">Moov Money</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1.5">Référence / Numéro de transaction</label>
-                                <input type="text" id="dep-ref" required placeholder="Ex: TX-123456789" class="w-full px-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 text-sm">
-                            </div>
-                            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm shadow-lg transition-all">
-                                Soumettre le dépôt
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Formulaire de Retrait -->
-                    <div class="bg-dark-800 border border-gray-700/60 rounded-3xl p-6 shadow-xl">
-                        <h3 class="font-bold text-white text-base mb-4 flex items-center">
-                            <i class="fa-solid fa-circle-arrow-up text-rose-400 mr-2"></i> Demander un Retrait
-                        </h3>
-                        <form id="withdrawal-form" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1.5">Montant (FCFA)</label>
-                                <input type="number" id="wit-amount" min="5000" required placeholder="Ex: 20000" class="w-full px-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1.5">Opérateur</label>
-                                <select id="wit-method" class="w-full px-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-amber-500 text-sm">
-                                    <option value="Orange Money">Orange Money</option>
-                                    <option value="MTN Money">MTN Money</option>
-                                    <option value="Wave">Wave</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1.5">Numéro de téléphone</label>
-                                <input type="text" id="wit-phone" required placeholder="Ex: +225 0700000000" class="w-full px-4 py-3 bg-dark-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 text-sm">
-                            </div>
-                            <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-dark-900 font-bold rounded-xl text-sm shadow-lg transition-all">
-                                Demander le retrait
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>`;
+            let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
+            users[email] = { password, balances: { recharge: 0, withdraw: 0, income: 0 }, orders: [], hasDeposited: false };
+            localStorage.setItem('autoinvest_users', JSON.stringify(users));
+            alert("Compte créé avec succès ! Connectez-vous.");
+            switchAuthTab('login');
         }
 
-        function renderUserHistory(transactions) {
-            if (transactions.length === 0) {
-                return `<div class="bg-dark-800/50 border border-gray-700/60 rounded-3xl p-12 text-center text-gray-500">Aucune transaction pour le moment.</div>`;
+        function initSession() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('dashboardApp').classList.remove('hidden');
+            
+            if(currentUser === ADMIN_EMAIL) {
+                document.getElementById('adminPanel').classList.remove('hidden');
+                renderAdminPanels();
             }
-
-            return `
-            <div class="bg-dark-800 border border-gray-700/60 rounded-2xl overflow-hidden shadow-xl max-w-4xl mx-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-dark-900/60 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400">
-                            <th class="p-4">Type</th>
-                            <th class="p-4">Montant</th>
-                            <th class="p-4">Détails</th>
-                            <th class="p-4">Date</th>
-                            <th class="p-4">Statut</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-800 text-sm">
-                        ${transactions.map(t => `
-                            <tr class="hover:bg-dark-700/40">
-                                <td class="p-4 font-medium text-white">${t.reference ? 'Dépôt' : 'Retrait'}</td>
-                                <td class="p-4 font-bold ${t.reference ? 'text-emerald-400' : 'text-rose-400'}">${t.reference ? '+' : '-'}${t.amount.toLocaleString()} FCFA</td>
-                                <td class="p-4 text-gray-300 text-xs">${t.method}${t.reference ? '(' + t.reference + ')' : '(' + t.phone + ')'}</td>
-                                <td class="p-4 text-gray-400 text-xs">${new Date(t.date).toLocaleString()}</td>
-                                <td class="p-4">
-                                    ${t.status === 'pending' ? '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs rounded-full font-medium border border-amber-500/20">En attente admin</span>' :
-                                      t.status === 'approved' ? '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded-full font-medium border border-emerald-500/20">Validé</span>' :
-                                      '<span class="px-2.5 py-1 bg-rose-500/10 text-rose-400 text-xs rounded-full font-medium border border-rose-500/20">Refusé</span>'}
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>`;
-        }
-
-        function initUserListeners(db) {
-            const depForm = document.getElementById('deposit-form');
-            if (depForm) {
-                depForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const amount = parseFloat(document.getElementById('dep-amount').value);
-                    const method = document.getElementById('dep-method').value;
-                    const reference = document.getElementById('dep-ref').value.trim();
-                    const user = db.users.find(u => u.id === db.session.id);
-
-                    const newDep = {
-                        id: 'dep_' + Date.now(),
-                        userId: user.id,
-                        userName: user.name,
-                        amount,
-                        method,
-                        reference,
-                        date: new Date().toISOString(),
-                        status: 'pending'
-                    };
-
-                    db.deposits.push(newDep);
-                    saveDB(db);
-                    showToast('Demande de dépôt soumise. En attente de validation par l\'administrateur.', 'success');
-                    setUserTab('history');
-                });
-            }
-
-            const witForm = document.getElementById('withdrawal-form');
-            if (witForm) {
-                witForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const amount = parseFloat(document.getElementById('wit-amount').value);
-                    const method = document.getElementById('wit-method').value;
-                    const phone = document.getElementById('wit-phone').value.trim();
-                    const user = db.users.find(u => u.id === db.session.id);
-
-                    if (user.balance < amount) {
-                        showToast('Solde insuffisant pour ce retrait.', 'error');
-                        return;
-                    }
-
-                    user.balance -= amount;
-
-                    const newWit = {
-                        id: 'wit_' + Date.now(),
-                        userId: user.id,
-                        userName: user.name,
-                        amount,
-                        method,
-                        phone,
-                        date: new Date().toISOString(),
-                        status: 'pending'
-                    };
-
-                    db.withdrawals.push(newWit);
-                    db.session = user;
-                    saveDB(db);
-                    showToast('Demande de retrait enregistrée avec succès.', 'success');
-                    setUserTab('history');
-                });
-            }
+            loadUserData();
+            switchView('accueil');
         }
 
         function logout() {
-            const db = getDB();
-            db.session = null;
-            saveDB(db);
-            showToast('Déconnexion réussie.', 'info');
-            renderApp();
+            currentUser = null;
+            document.getElementById('dashboardApp').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
         }
 
-        window.onload = function() {
-            renderApp();
-        };
+        function loadUserData() {
+            if(currentUser === ADMIN_EMAIL) {
+                balances = { recharge: 500000, withdraw: 200000, income: 0 };
+                hasDeposited = true;
+            } else {
+                let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
+                if(users[currentUser]) {
+                    balances = users[currentUser].balances;
+                    activeOrders = users[currentUser].orders || [];
+                    hasDeposited = users[currentUser].hasDeposited || false;
+                }
+            }
+            document.getElementById('rechargeBalance').innerText = `XOF ${balances.recharge.toFixed(2)}`;
+            document.getElementById('withdrawBalance').innerText = `XOF ${balances.withdraw.toFixed(2)}`;
+            document.getElementById('incomeBalance').innerText = `XOF ${balances.income.toFixed(2)}`;
+            
+            const warningBanner = document.getElementById('depositWarningBanner');
+            if(warningBanner) {
+                if(!hasDeposited) warningBanner.classList.remove('hidden');
+                else warningBanner.classList.add('hidden');
+            }
+            renderOrders();
+        }
+
+        function saveUserData() {
+            if(currentUser && currentUser !== ADMIN_EMAIL) {
+                let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
+                if(users[currentUser]) {
+                    users[currentUser].balances = balances;
+                    users[currentUser].orders = activeOrders;
+                    users[currentUser].hasDeposited = hasDeposited;
+                    localStorage.setItem('autoinvest_users', JSON.stringify(users));
+                }
+            }
+        }
+
+        function openDepositMethodModal() { document.getElementById('depositMethodModal').classList.remove('hidden'); }
+        function closeDepositMethodModal() { document.getElementById('depositMethodModal').classList.add('hidden'); }
+        function selectMethod(method) { 
+            selectedMethodName = method; 
+            document.getElementById('depositMethodTitle').innerText = method;
+            closeDepositMethodModal(); 
+            document.getElementById('depositDetailsModal').classList.remove('hidden'); 
+        }
+        function closeDepositDetailsModal() { document.getElementById('depositDetailsModal').classList.add('hidden'); }
+
+        function copyDepositInfo() {
+            navigator.clipboard.writeText("0596180495 (Auto Invest)");
+            alert("Numéro et nom copiés dans le presse-papier !");
+        }
+
+        function submitDepositRequest() {
+            const amt = parseFloat(document.getElementById('depositAmountInput').value);
+            if(isNaN(amt) || amt < 2500) { alert("Le dépôt minimum est de 2 500 FCFA."); return; }
+            
+            let reqs = JSON.parse(localStorage.getItem('autoinvest_deposits') || "[]");
+            reqs.push({ id: Date.now(), user: currentUser, amount: amt, method: selectedMethodName });
+            localStorage.setItem('autoinvest_deposits', JSON.stringify(reqs));
+            
+            closeDepositDetailsModal();
+            alert("Demande de dépôt soumise. L'argent sera crédité après validation de l'administrateur.");
+            if(currentUser === ADMIN_EMAIL) renderAdminPanels();
+        }
+
+        function renderAdminPanels() {
+            let reqs = JSON.parse(localStorage.getItem('autoinvest_deposits') || "[]");
+            let listDep = document.getElementById('adminDepositsList');
+            if(reqs.length === 0) { listDep.innerHTML = '<p class="text-[11px] text-slate-500 italic text-center py-2">Aucun dépôt en attente.</p>'; }
+            else {
+                let html = "";
+                reqs.forEach(r => {
+                    html += `<div class="bg-slate-900 p-2 rounded-xl flex justify-between items-center text-xs">
+                        <div><span class="font-bold text-amber-400">${r.amount} XOF</span> (${r.user})</div>
+                        <button onclick="adminValidateDeposit(${r.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded font-bold">Valider</button>
+                    </div>`;
+                });
+                listDep.innerHTML = html;
+            }
+
+            let withs = JSON.parse(localStorage.getItem('autoinvest_night_withdrawals') || "[]");
+            let listWith = document.getElementById('adminWithdrawalsList');
+            if(withs.length === 0) { listWith.innerHTML = '<p class="text-[11px] text-slate-500 italic text-center py-2">Aucun retrait de nuit en attente.</p>'; }
+            else {
+                let htmlW = "";
+                withs.forEach(w => {
+                    htmlW += `<div class="bg-slate-900 p-2 rounded-xl flex justify-between items-center text-xs">
+                        <div><span class="font-bold text-rose-400">${w.amount} XOF</span> (${w.user})</div>
+                        <div class="space-x-1">
+                            <button onclick="adminValidateWithdraw(${w.id}, true)" class="bg-emerald-600 text-white px-2 py-0.5 rounded font-bold">Valider</button>
+                            <button onclick="adminValidateWithdraw(${w.id}, false)" class="bg-rose-600 text-white px-2 py-0.5 rounded font-bold">Refuser</button>
+                        </div>
+                    </div>`;
+                });
+                listWith.innerHTML = htmlW;
+            }
+        }
+
+        function adminValidateDeposit(id) {
+            let reqs = JSON.parse(localStorage.getItem('autoinvest_deposits') || "[]");
+            let idx = reqs.findIndex(r => r.id === id);
+            if(idx !== -1) {
+                let r = reqs[idx];
+                let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
+                if(users[r.user]) {
+                    users[r.user].balances.recharge += r.amount;
+                    users[r.user].hasDeposited = true;
+                    localStorage.setItem('autoinvest_users', JSON.stringify(users));
+                }
+                reqs.splice(idx, 1);
+                localStorage.setItem('autoinvest_deposits', JSON.stringify(reqs));
+                renderAdminPanels();
+                loadUserData();
+                alert("Dépôt validé ! Compte utilisateur activé pour l'investissement.");
+            }
+        }
+
+        function adminValidateWithdraw(id, approved) {
+            let withs = JSON.parse(localStorage.getItem('autoinvest_night_withdrawals') || "[]");
+            let idx = withs.findIndex(w => w.id === id);
+            if(idx !== -1) {
+                let w = withs[idx];
+                let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
+                if(users[w.user]) {
+                    if(!approved) {
+                        users[w.user].balances.withdraw += w.amount;
+                        alert("Retrait refusé. Les fonds ont été recrédités sur le compte de l'utilisateur.");
+                    } else {
+                        alert("Retrait de nuit validé et payé avec succès !");
+                    }
+                    localStorage.setItem('autoinvest_users', JSON.stringify(users));
+                }
+                withs.splice(idx, 1);
+                localStorage.setItem('autoinvest_night_withdrawals', JSON.stringify(withs));
+                renderAdminPanels();
+                loadUserData();
+            }
+        }
+
+        function investInPlan(cost, daily, name) {
+            if(!hasDeposited && currentUser !== ADMIN_EMAIL) {
+                alert("Action impossible : Vous devez effectuer un premier dépôt d'au moins 2 500 FCFA pour activer votre compte et commencer à investir.");
+                openDepositMethodModal();
+                return;
+            }
+            if(balances.recharge < cost) {
+                alert("Solde de recharge insuffisant. Veuillez recharger d'abord.");
+                openDepositMethodModal();
+                return;
+            }
+            balances.recharge -= cost;
+            activeOrders.push({ name, cost, daily, date: new Date().toLocaleDateString() });
+            saveUserData();
+            loadUserData();
+            alert(`Investissement dans "${name}" réussi !`);
+            switchView('commandes');
+        }
+
+        function simulateDailyIncome() {
+            if(activeOrders.length === 0) {
+                alert("Aucun investissement actif pour générer des gains.");
+                return;
+            }
+            let totalDaily = 0;
+            activeOrders.forEach(o => { totalDaily += o.daily; });
+            balances.withdraw += totalDaily;
+            saveUserData();
+            loadUserData();
+            alert(`Investissement validé ! Vos gains du jour (+${totalDaily} FCFA) ont été ajoutés instantanément à votre solde de retrait.`);
+        }
+
+        function renderOrders() {
+            let container = document.getElementById('ordersListContainer');
+            if(activeOrders.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-500 italic text-center py-4">Aucun investissement en cours pour le moment.</p>';
+                return;
+            }
+            let html = "";
+            activeOrders.forEach(o => {
+                html += `<div class="gradient-card border border-slate-700/60 p-3 rounded-xl flex justify-between items-center text-xs">
+                    <div>
+                        <h4 class="font-bold text-white">${o.name}</h4>
+                        <p class="text-slate-400">Investi : ${o.cost} XOF</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-emerald-400 font-bold">+${o.daily} XOF/j (Instantané)</span>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function openWithdrawModal() { 
+            updateTimeDisplay();
+            document.getElementById('withdrawModal').classList.remove('hidden'); 
+        }
+        function closeWithdrawModal() { document.getElementById('withdrawModal').classList.add('hidden'); }
+
+        function updateTimeDisplay() {
+            let timeStr = simulatedHour < 10 ? `0${simulatedHour}:00` : `${simulatedHour}:00`;
+            let isNight = (simulatedHour >= 22 || simulatedHour < 6);
+            document.getElementById('currentTimeDisplay').innerText = `${timeStr} (${isNight ? '🌙 Nuit' : '☀ Jour'})`;
+            let btn = document.getElementById('nightModeToggleBtn');
+            if(isNight) {
+                btn.className = "w-full text-xs font-bold py-1.5 rounded-lg border bg-purple-500/20 border-purple-500/50 text-purple-300";
+                btn.innerText = "Mode Actuel : NUIT (Validation Admin Requise)";
+            } else {
+                btn.className = "w-full text-xs font-bold py-1.5 rounded-lg border bg-amber-500/20 border-amber-500/50 text-amber-300";
+                btn.innerText = "Mode Actuel : JOUR (Retrait Standard)";
+            }
+        }
+
+        function toggleNightModeSimulation() {
+            simulatedHour = (simulatedHour === 14) ? 23 : 14;
+            updateTimeDisplay();
+        }
+
+        function submitWithdrawRequest() {
+            const amt = parseFloat(document.getElementById('withdrawAmountInput').value);
+            if(isNaN(amt) || amt < 1100) {
+                alert("Le montant minimum de retrait est de 1 100 FCFA.");
+                return;
+            }
+            if(balances.withdraw < amt) {
+                alert("Solde de retrait insuffisant.");
+                return;
+            }
+
+            balances.withdraw -= amt;
+            let isNight = (simulatedHour >= 22 || simulatedHour < 6);
+
+            if(isNight) {
+                let withs = JSON.parse(localStorage.getItem('autoinvest_night_withdrawals') || "[]");
+                withs.push({ id: Date.now(), user: currentUser, amount: amt });
+                localStorage.setItem('autoinvest_night_withdrawals', JSON.stringify(withs));
+                
+                saveUserData();
+                loadUserData();
+                closeWithdrawModal();
+                alert("Votre demande de retrait a bien été enregistrée. S'agissant d'une plage horaire de nuit, les fonds sont en attente de validation par un administrateur.");
+                if(currentUser === ADMIN_EMAIL) renderAdminPanels();
+            } else {
+                saveUserData();
+                loadUserData();
+                closeWithdrawModal();
+                alert(`Retrait de ${amt} FCFA effectué avec succès !`);
+            }
+        }
+
+        function openModal(title, text) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = text;
+            document.getElementById('actionModal').classList.remove('hidden');
+        }
+        function closeModal() { document.getElementById('actionModal').classList.add('hidden'); }
+        function openServiceModal() { openModal("Service Client", "Contactez notre support Telegram ou l'administrateur directement pour toute assistance."); }
+        function copyInviteLink() { navigator.clipboard.writeText("https://autoinvest.vip/ref=msu"); alert("Lien copié !"); }
     </script>
 </body>
 </html>
