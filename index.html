@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto Invest - Plateforme VIP (20 Plans & Stats Admin)</title>
+    <title>Auto Invest - Plateforme VIP (20 Plans)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -119,47 +119,6 @@
 
         <main class="max-w-md mx-auto p-4 space-y-4">
             
-            <!-- PANNEAU ADMIN AVEC SECTION UTILISATEURS EN LIGNE -->
-            <div id="adminPanel" class="hidden gradient-card border-2 border-orange-500/60 rounded-2xl p-4 shadow-2xl space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                    <h3 class="text-xs font-extrabold text-orange-400 uppercase tracking-wider flex items-center space-x-2">
-                        <i class="fa-solid fa-user-shield text-sm"></i>
-                        <span>Panneau Administrateur</span>
-                    </h3>
-                    <span class="bg-orange-500/20 text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded border border-orange-500/30">ACTIF</span>
-                </div>
-                
-                <div class="space-y-3">
-                    <!-- NOUVELLE SECTION : UTILISATEURS EN LIGNE / TOTAL -->
-                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-300 flex items-center space-x-1.5">
-                                <i class="fa-solid fa-users-viewfinder text-sky-400"></i>
-                                <span>Utilisateurs sur le site :</span>
-                            </span>
-                            <span id="adminOnlineCount" class="bg-emerald-500/20 text-emerald-400 text-xs font-extrabold px-2 py-0.5 rounded border border-emerald-500/30">0 en ligne</span>
-                        </div>
-                        <div id="adminUsersList" class="space-y-1.5 max-h-28 overflow-y-auto pt-1 border-t border-slate-800">
-                            <p class="text-[11px] text-slate-500 italic text-center py-1">Chargement des utilisateurs...</p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <p class="text-xs font-bold text-slate-300 mb-1">Validation des Dépôts :</p>
-                        <div id="adminDepositsList" class="space-y-2 max-h-32 overflow-y-auto">
-                            <p class="text-[11px] text-slate-500 italic text-center py-2">Aucun dépôt en attente.</p>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-slate-700 pt-2">
-                        <p class="text-xs font-bold text-slate-300 mb-1">Validation des Retraits (Nuit) :</p>
-                        <div id="adminWithdrawalsList" class="space-y-2 max-h-32 overflow-y-auto">
-                            <p class="text-[11px] text-slate-500 italic text-center py-2">Aucun retrait de nuit en attente.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- ================= VUE ACCUEIL ================= -->
             <div id="view-accueil" class="space-y-4">
                 <!-- Soldes -->
@@ -409,16 +368,6 @@
         <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-center">
             <h3 class="text-base font-bold text-white">Effectuer un retrait</h3>
             <p class="text-xs text-slate-400">Retrait minimum : <strong class="text-amber-400">1 100 FCFA</strong></p>
-            
-            <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 text-left space-y-2">
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-slate-300">Simulateur horaire :</span>
-                    <span id="currentTimeDisplay" class="font-bold text-orange-400"></span>
-                </div>
-                <button onclick="toggleNightModeSimulation()" id="nightModeToggleBtn" class="w-full text-xs font-bold py-1.5 rounded-lg border transition">
-                    Basculer Mode Nuit / Jour
-                </button>
-            </div>
 
             <input type="number" id="withdrawAmountInput" placeholder="Montant en FCFA (Min 1100)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500">
             
@@ -439,14 +388,11 @@
     </div>
 
     <script>
-        const ADMIN_EMAIL = "msourabi610@gmail.com";
-        const ADMIN_PASS = "12345";
         let currentUser = null;
         let balances = { recharge: 0, withdraw: 0, income: 0 };
         let activeOrders = [];
         let hasDeposited = false;
         let selectedMethodName = "";
-        let simulatedHour = 14;
         let currentVipTab = 'court';
 
         const courtTermPlans = [
@@ -566,21 +512,13 @@
             const email = document.getElementById('loginEmail').value.trim().toLowerCase();
             const password = document.getElementById('loginPassword').value.trim();
 
-            if(email === ADMIN_EMAIL && password === ADMIN_PASS) {
-                currentUser = ADMIN_EMAIL;
-                registerOnlineStatus(ADMIN_EMAIL);
-                initSession();
-                return;
-            }
-
             let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
             if(!users[email] || users[email].password !== password) {
-                alert("Identifiants incorrects.");
+                alert("Identifiants incorrects ou compte inexistant.");
                 return;
             }
 
             currentUser = email;
-            registerOnlineStatus(email);
             initSession();
         }
 
@@ -596,46 +534,25 @@
             switchAuthTab('login');
         }
 
-        function registerOnlineStatus(email) {
-            let onlineUsers = JSON.parse(localStorage.getItem('autoinvest_online') || "{}");
-            onlineUsers[email] = Date.now();
-            localStorage.setItem('autoinvest_online', JSON.stringify(onlineUsers));
-        }
-
         function initSession() {
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('dashboardApp').classList.remove('hidden');
-            
-            if(currentUser === ADMIN_EMAIL) {
-                document.getElementById('adminPanel').classList.remove('hidden');
-                renderAdminPanels();
-            }
             loadUserData();
             switchView('accueil');
         }
 
         function logout() {
-            if(currentUser) {
-                let onlineUsers = JSON.parse(localStorage.getItem('autoinvest_online') || "{}");
-                delete onlineUsers[currentUser];
-                localStorage.setItem('autoinvest_online', JSON.stringify(onlineUsers));
-            }
             currentUser = null;
             document.getElementById('dashboardApp').classList.add('hidden');
             document.getElementById('authScreen').classList.remove('hidden');
         }
 
         function loadUserData() {
-            if(currentUser === ADMIN_EMAIL) {
-                balances = { recharge: 500000, withdraw: 200000, income: 0 };
-                hasDeposited = true;
-            } else {
-                let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
-                if(users[currentUser]) {
-                    balances = users[currentUser].balances;
-                    activeOrders = users[currentUser].orders || [];
-                    hasDeposited = users[currentUser].hasDeposited || false;
-                }
+            let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
+            if(users[currentUser]) {
+                balances = users[currentUser].balances;
+                activeOrders = users[currentUser].orders || [];
+                hasDeposited = users[currentUser].hasDeposited || false;
             }
             document.getElementById('rechargeBalance').innerText = `XOF ${balances.recharge.toFixed(2)}`;
             document.getElementById('withdrawBalance').innerText = `XOF ${balances.withdraw.toFixed(2)}`;
@@ -650,7 +567,7 @@
         }
 
         function saveUserData() {
-            if(currentUser && currentUser !== ADMIN_EMAIL) {
+            if(currentUser) {
                 let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
                 if(users[currentUser]) {
                     users[currentUser].balances = balances;
@@ -680,128 +597,18 @@
             const amt = parseFloat(document.getElementById('depositAmountInput').value);
             if(isNaN(amt) || amt < 2500) { alert("Le dépôt minimum est de 2 500 FCFA."); return; }
             
-            let reqs = JSON.parse(localStorage.getItem('autoinvest_deposits') || "[]");
-            reqs.push({ id: Date.now(), user: currentUser, amount: amt, method: selectedMethodName });
-            localStorage.setItem('autoinvest_deposits', JSON.stringify(reqs));
-            
+            // Validation directe et automatique du dépôt pour l'utilisateur
+            balances.recharge += amt;
+            hasDeposited = true;
+            saveUserData();
+            loadUserData();
+
             closeDepositDetailsModal();
-            alert("Demande de dépôt soumise. L'argent sera crédité après validation de l'administrateur.");
-            if(currentUser === ADMIN_EMAIL) renderAdminPanels();
-        }
-
-        function renderAdminPanels() {
-            // Section Utilisateurs en ligne et inscrits
-            let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
-            let onlineUsers = JSON.parse(localStorage.getItem('autoinvest_online') || "{}");
-            
-            // Nettoyer les sessions inactives de plus de 15 minutes si besoin
-            let now = Date.now();
-            let activeCount = 0;
-            let listHtml = "";
-
-            // Ajouter l'admin s'il est connecté
-            if(onlineUsers[ADMIN_EMAIL]) {
-                activeCount++;
-                listHtml += `<div class="flex justify-between items-center text-[11px] text-slate-300 bg-slate-950/40 px-2 py-1 rounded">
-                    <span><i class="fa-solid fa-circle text-[8px] text-emerald-400 mr-1"></i> ${ADMIN_EMAIL} <strong class="text-orange-400">(Admin)</strong></span>
-                    <span class="text-emerald-400 font-bold">En ligne</span>
-                </div>`;
-            }
-
-            for(let email in users) {
-                let isOnline = onlineUsers[email] && (now - onlineUsers[email] < 15 * 60 * 1000);
-                if(isOnline) activeCount++;
-                
-                listHtml += `<div class="flex justify-between items-center text-[11px] text-slate-300 bg-slate-950/40 px-2 py-1 rounded">
-                    <span><i class="fa-solid fa-circle text-[8px] ${isOnline ? 'text-emerald-400' : 'text-slate-500'} mr-1"></i> ${email}</span>
-                    <span class="${isOnline ? 'text-emerald-400 font-bold' : 'text-slate-500'}">${isOnline ? 'En ligne' : 'Hors ligne'}</span>
-                </div>`;
-            }
-
-            if(Object.keys(users).length === 0 && !onlineUsers[ADMIN_EMAIL]) {
-                listHtml = '<p class="text-[11px] text-slate-500 italic text-center py-1">Aucun utilisateur enregistré.</p>';
-            }
-
-            document.getElementById('adminOnlineCount').innerText = `${activeCount} en ligne (${Object.keys(users).length + 1} total)`;
-            document.getElementById('adminUsersList').innerHTML = listHtml;
-
-            // Dépôts en attente
-            let reqs = JSON.parse(localStorage.getItem('autoinvest_deposits') || "[]");
-            let listDep = document.getElementById('adminDepositsList');
-            if(reqs.length === 0) { listDep.innerHTML = '<p class="text-[11px] text-slate-500 italic text-center py-2">Aucun dépôt en attente.</p>'; }
-            else {
-                let html = "";
-                reqs.forEach(r => {
-                    html += `<div class="bg-slate-900 p-2 rounded-xl flex justify-between items-center text-xs">
-                        <div><span class="font-bold text-amber-400">${r.amount} XOF</span> (${r.user})</div>
-                        <button onclick="adminValidateDeposit(${r.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded font-bold">Valider</button>
-                    </div>`;
-                });
-                listDep.innerHTML = html;
-            }
-
-            // Retraits de nuit en attente
-            let withs = JSON.parse(localStorage.getItem('autoinvest_night_withdrawals') || "[]");
-            let listWith = document.getElementById('adminWithdrawalsList');
-            if(withs.length === 0) { listWith.innerHTML = '<p class="text-[11px] text-slate-500 italic text-center py-2">Aucun retrait de nuit en attente.</p>'; }
-            else {
-                let htmlW = "";
-                withs.forEach(w => {
-                    htmlW += `<div class="bg-slate-900 p-2 rounded-xl flex justify-between items-center text-xs">
-                        <div><span class="font-bold text-rose-400">${w.amount} XOF</span> (${w.user})</div>
-                        <div class="space-x-1">
-                            <button onclick="adminValidateWithdraw(${w.id}, true)" class="bg-emerald-600 text-white px-2 py-0.5 rounded font-bold">Valider</button>
-                            <button onclick="adminValidateWithdraw(${w.id}, false)" class="bg-rose-600 text-white px-2 py-0.5 rounded font-bold">Refuser</button>
-                        </div>
-                    </div>`;
-                });
-                listWith.innerHTML = htmlW;
-            }
-        }
-
-        function adminValidateDeposit(id) {
-            let reqs = JSON.parse(localStorage.getItem('autoinvest_deposits') || "[]");
-            let idx = reqs.findIndex(r => r.id === id);
-            if(idx !== -1) {
-                let r = reqs[idx];
-                let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
-                if(users[r.user]) {
-                    users[r.user].balances.recharge += r.amount;
-                    users[r.user].hasDeposited = true;
-                    localStorage.setItem('autoinvest_users', JSON.stringify(users));
-                }
-                reqs.splice(idx, 1);
-                localStorage.setItem('autoinvest_deposits', JSON.stringify(reqs));
-                renderAdminPanels();
-                loadUserData();
-                alert("Dépôt validé ! Compte utilisateur activé pour l'investissement.");
-            }
-        }
-
-        function adminValidateWithdraw(id, approved) {
-            let withs = JSON.parse(localStorage.getItem('autoinvest_night_withdrawals') || "[]");
-            let idx = withs.findIndex(w => w.id === id);
-            if(idx !== -1) {
-                let w = withs[idx];
-                let users = JSON.parse(localStorage.getItem('autoinvest_users') || "{}");
-                if(users[w.user]) {
-                    if(!approved) {
-                        users[w.user].balances.withdraw += w.amount;
-                        alert("Retrait refusé. Les fonds ont été recrédités sur le compte de l'utilisateur.");
-                    } else {
-                        alert("Retrait de nuit validé et payé avec succès !");
-                    }
-                    localStorage.setItem('autoinvest_users', JSON.stringify(users));
-                }
-                withs.splice(idx, 1);
-                localStorage.setItem('autoinvest_night_withdrawals', JSON.stringify(withs));
-                renderAdminPanels();
-                loadUserData();
-            }
+            alert(`Dépôt de ${amt} FCFA validé avec succès ! Votre compte est activé.`);
         }
 
         function investInPlan(cost, daily, name) {
-            if(!hasDeposited && currentUser !== ADMIN_EMAIL) {
+            if(!hasDeposited) {
                 alert("Action impossible : Vous devez effectuer un premier dépôt d'au moins 2 500 FCFA pour activer votre compte et commencer à investir.");
                 openDepositMethodModal();
                 return;
@@ -826,10 +633,12 @@
             }
             let totalDaily = 0;
             activeOrders.forEach(o => { totalDaily += o.daily; });
+            
+            // Crédit direct et automatique sur le solde de retrait
             balances.withdraw += totalDaily;
             saveUserData();
             loadUserData();
-            alert(`Investissement validé ! Vos gains du jour (+${totalDaily} FCFA) ont été ajoutés instantanément à votre solde de retrait.`);
+            alert(`Gains du jour récupérés ! +${totalDaily} FCFA ajoutés instantanément à votre solde de retrait.`);
         }
 
         function renderOrders() {
@@ -854,29 +663,9 @@
         }
 
         function openWithdrawModal() { 
-            updateTimeDisplay();
             document.getElementById('withdrawModal').classList.remove('hidden'); 
         }
         function closeWithdrawModal() { document.getElementById('withdrawModal').classList.add('hidden'); }
-
-        function updateTimeDisplay() {
-            let timeStr = simulatedHour < 10 ? `0${simulatedHour}:00` : `${simulatedHour}:00`;
-            let isNight = (simulatedHour >= 22 || simulatedHour < 6);
-            document.getElementById('currentTimeDisplay').innerText = `${timeStr} (${isNight ? '🌙 Nuit' : '☀ Jour'})`;
-            let btn = document.getElementById('nightModeToggleBtn');
-            if(isNight) {
-                btn.className = "w-full text-xs font-bold py-1.5 rounded-lg border bg-purple-500/20 border-purple-500/50 text-purple-300";
-                btn.innerText = "Mode Actuel : NUIT (Validation Admin Requise)";
-            } else {
-                btn.className = "w-full text-xs font-bold py-1.5 rounded-lg border bg-amber-500/20 border-amber-500/50 text-amber-300";
-                btn.innerText = "Mode Actuel : JOUR (Retrait Standard)";
-            }
-        }
-
-        function toggleNightModeSimulation() {
-            simulatedHour = (simulatedHour === 14) ? 23 : 14;
-            updateTimeDisplay();
-        }
 
         function submitWithdrawRequest() {
             const amt = parseFloat(document.getElementById('withdrawAmountInput').value);
@@ -890,24 +679,10 @@
             }
 
             balances.withdraw -= amt;
-            let isNight = (simulatedHour >= 22 || simulatedHour < 6);
-
-            if(isNight) {
-                let withs = JSON.parse(localStorage.getItem('autoinvest_night_withdrawals') || "[]");
-                withs.push({ id: Date.now(), user: currentUser, amount: amt });
-                localStorage.setItem('autoinvest_night_withdrawals', JSON.stringify(withs));
-                
-                saveUserData();
-                loadUserData();
-                closeWithdrawModal();
-                alert("Votre demande de retrait a bien été enregistrée. S'agissant d'une plage horaire de nuit, les fonds sont en attente de validation par un administrateur.");
-                if(currentUser === ADMIN_EMAIL) renderAdminPanels();
-            } else {
-                saveUserData();
-                loadUserData();
-                closeWithdrawModal();
-                alert(`Retrait de ${amt} FCFA effectué avec succès !`);
-            }
+            saveUserData();
+            loadUserData();
+            closeWithdrawModal();
+            alert(`Retrait de ${amt} FCFA effectué avec succès sur votre compte !`);
         }
 
         function openModal(title, text) {
@@ -916,7 +691,7 @@
             document.getElementById('actionModal').classList.remove('hidden');
         }
         function closeModal() { document.getElementById('actionModal').classList.add('hidden'); }
-        function openServiceModal() { openModal("Service Client", "Contactez notre support Telegram ou l'administrateur directement pour toute assistance."); }
+        function openServiceModal() { openModal("Service Client", "Contactez notre support Telegram ou l'assistance directement pour toute aide."); }
         function copyInviteLink() { navigator.clipboard.writeText("https://autoinvest.vip/ref=msu"); alert("Lien copié !"); }
     </script>
 </body>
